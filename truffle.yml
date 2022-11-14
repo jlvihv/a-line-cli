@@ -1,0 +1,26 @@
+version: 1.0
+name: my-truffle
+stages:
+  git-clone:
+    steps:
+      - name: git-clone
+        uses: git-checkout
+        with:
+          url: https://github.com/mohaijiang/truffle-MetaCoin.git
+          branch: main
+  code-compile:
+    needs:
+      - git-clone
+    steps:
+      - name: code-compile
+        runs-on: maven:3.5-jdk-8
+        run: |
+          npm install -g truffle
+          truffle compile
+
+  build-image:
+    needs:
+      - code-compile
+    steps:
+      - run: |
+          docker build -t mohaijiang/spring-boot-example:20221109 .

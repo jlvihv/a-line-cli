@@ -4,12 +4,14 @@ import (
 	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"github.com/hamster-shared/a-line-cli/pkg/pipeline"
+	"github.com/hamster-shared/a-line-cli/pkg/service"
 )
 
-func NewExecutorClient(channel chan model.QueueMessage) *ExecutorClient {
+func NewExecutorClient(channel chan model.QueueMessage, jobService service.IJobService) *ExecutorClient {
 	return &ExecutorClient{
 		executor: &Executor{
-			cancelMap: make(map[string]func()),
+			cancelMap:  make(map[string]func()),
+			jobService: jobService,
 		},
 		channel: channel,
 	}

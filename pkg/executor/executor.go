@@ -5,8 +5,11 @@ import (
 	"fmt"
 	action2 "github.com/hamster-shared/a-line-cli/pkg/action"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/service"
 	"github.com/hamster-shared/a-line-cli/pkg/utils"
+	"gopkg.in/yaml.v2"
 	"io"
+	"strings"
 )
 
 type IExecutor interface {
@@ -27,14 +30,17 @@ type IExecutor interface {
 }
 
 type Executor struct {
-	cancelMap map[string]func()
+	cancelMap  map[string]func()
+	jobService service.IJobService
 }
 
 // FetchJob 获取任务
 func (e *Executor) FetchJob(name string) (io.Reader, error) {
 
 	//TODO... 根据name 从rpc 或 直接内部调用获取job的pipeline文件
-	return nil, nil
+	job := e.jobService.GetJob(name)
+	data, err := yaml.Marshal(job)
+	return strings.NewReader(string(data)), err
 }
 
 // Execute 执行任务

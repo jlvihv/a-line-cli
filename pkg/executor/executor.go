@@ -74,6 +74,8 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	// 队列堆栈
 	var stack utils.Stack[action2.ActionHandler]
 
+	jobWrapper.Status = model.STATUS_RUNNING
+
 	executeAction := func(ah action2.ActionHandler, job model.JobWrapper) error {
 		if jobWrapper.Status != model.STATUS_RUNNING {
 			return nil

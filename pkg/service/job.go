@@ -6,6 +6,10 @@ type IJobService interface {
 	SaveJob(name string, job *model.Job)
 
 	GetJob(name string) *model.Job
+
+	SaveJobDetail(name string, job *model.JobDetail)
+
+	GetJobDetail(name string) *model.JobDetail
 }
 
 type JobService struct {

@@ -17,14 +17,15 @@ const (
 	STATUS_SUCCESS Status = 3
 )
 
-type JobWrapper struct {
+type JobDetail struct {
 	Id int
 	Job
 	Status Status
+	Stages []StageDetail
 }
 
 // StageSort job 排序
-func (job *Job) StageSort() ([]StageWrapper, error) {
+func (job *Job) StageSort() ([]StageDetail, error) {
 	stages := make(map[string]Stage)
 	for key, stage := range job.Stages {
 		stages[key] = stage
@@ -32,7 +33,7 @@ func (job *Job) StageSort() ([]StageWrapper, error) {
 
 	sortedMap := make(map[string]any)
 
-	stageList := make([]StageWrapper, 0)
+	stageList := make([]StageDetail, 0)
 	for len(stages) > 0 {
 		last := len(stages)
 		for key, stage := range stages {
@@ -46,7 +47,7 @@ func (job *Job) StageSort() ([]StageWrapper, error) {
 			if allContains {
 				sortedMap[key] = ""
 				delete(stages, key)
-				stageList = append(stageList, NewStageWrapper(key, stage))
+				stageList = append(stageList, NewStageDetail(key, stage))
 			}
 		}
 

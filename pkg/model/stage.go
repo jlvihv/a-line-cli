@@ -5,13 +5,13 @@ type Stage struct {
 	Needs []string `yaml:"needs"`
 }
 
-type StageWrapper struct {
+type StageDetail struct {
 	Name  string
 	Stage Stage
 }
 
-func NewStageWrapper(name string, stage Stage) StageWrapper {
-	return StageWrapper{
+func NewStageDetail(name string, stage Stage) StageDetail {
+	return StageDetail{
 		Name:  name,
 		Stage: stage,
 	}

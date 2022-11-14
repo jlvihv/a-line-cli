@@ -46,14 +46,14 @@ func (e *Executor) FetchJob(name string) (io.Reader, error) {
 // Execute 执行任务
 func (e *Executor) Execute(id int, job *model.Job) error {
 
-	jobWrapper := model.JobWrapper{
+	// 1. 解析对pipeline 进行任务排序
+	stages, err := job.StageSort()
+	jobWrapper := &model.JobDetail{
 		Job:    *job,
 		Status: model.STATUS_NOTRUN,
+		Stages: stages,
 	}
 
-	// 1. 解析对pipeline 进行任务排序
-
-	stages, err := job.StageSort()
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 
 	jobWrapper.Status = model.STATUS_RUNNING
 
-	executeAction := func(ah action2.ActionHandler, job model.JobWrapper) error {
+	executeAction := func(ah action2.ActionHandler, job *model.JobDetail) error {
 		if jobWrapper.Status != model.STATUS_RUNNING {
 			return nil
 		}
@@ -98,6 +98,8 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	for _, stageWapper := range stages {
 		//TODO ... stage的输出也需要换成堆栈方式
 		fmt.Println("stage : ", stageWapper.Name)
+		stageWapper.Status = model.STATUS_RUNNING
+		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
 		for _, step := range stageWapper.Stage.Steps {
 			var ah action2.ActionHandler
 			if step.RunsOn != "" {

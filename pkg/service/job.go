@@ -13,7 +13,8 @@ type IJobService interface {
 }
 
 type JobService struct {
-	store map[string]*model.Job
+	store   map[string]*model.Job
+	details map[string]*model.JobDetail
 }
 
 func NewJobService() *JobService {
@@ -30,4 +31,14 @@ func (svc *JobService) SaveJob(name string, job *model.Job) {
 func (svc *JobService) GetJob(name string) *model.Job {
 	/// TODO ... 通过文件获取job
 	return svc.store[name]
+}
+
+func (svc *JobService) SaveJobDetail(name string, job *model.JobDetail) {
+	// TODO .. 保存job文件
+	svc.details[name] = job
+}
+
+func (svc *JobService) GetJobDetail(name string) *model.JobDetail {
+	/// TODO ... 通过文件获取job
+	return svc.details[name]
 }

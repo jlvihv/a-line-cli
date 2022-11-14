@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/hamster-shared/a-line-cli/pkg/dispatcher"
 	"github.com/hamster-shared/a-line-cli/pkg/executor"
+	"github.com/hamster-shared/a-line-cli/pkg/http"
 	model2 "github.com/hamster-shared/a-line-cli/pkg/model"
 	"github.com/hamster-shared/a-line-cli/pkg/pipeline"
 	"github.com/hamster-shared/a-line-cli/pkg/service"
@@ -36,5 +37,5 @@ func Main(reader io.Reader) {
 	node := dispatch.DispatchNode(job)
 	dispatch.SendJob(job, node)
 
-	select {}
+	go http.NewHttpService(jobService)
 }

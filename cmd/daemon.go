@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"state-example/pkg/dispatcher"
-	"state-example/pkg/executor"
-	model2 "state-example/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/dispatcher"
+	"github.com/hamster-shared/a-line-cli/pkg/executor"
+	model2 "github.com/hamster-shared/a-line-cli/pkg/model"
 )
 
 func Main() {

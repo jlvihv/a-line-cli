@@ -1,8 +1,8 @@
 package dispatcher
 
 import (
-	"state-example/pkg/executor"
-	model2 "state-example/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/executor"
+	model2 "github.com/hamster-shared/a-line-cli/pkg/model"
 )
 
 type IDispatcher interface {

@@ -1,4 +1,4 @@
-module state-example
+module github.com/hamster-shared/a-line-cli
 
 go 1.19
 

@@ -1,9 +1,9 @@
 package executor
 
 import (
-	"state-example/pkg/logger"
-	"state-example/pkg/model"
-	"state-example/pkg/pipeline"
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/pipeline"
 )
 
 func NewExecutorClient(channel chan model.QueueMessage) *ExecutorClient {

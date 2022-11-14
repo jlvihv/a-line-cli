@@ -3,10 +3,10 @@ package executor
 import (
 	"context"
 	"fmt"
+	action2 "github.com/hamster-shared/a-line-cli/pkg/action"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/utils"
 	"io"
-	action2 "state-example/pkg/action"
-	"state-example/pkg/model"
-	"state-example/pkg/utils"
 )
 
 type IExecutor interface {

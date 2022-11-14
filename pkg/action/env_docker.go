@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"os"
 	"os/exec"
-	"state-example/pkg/logger"
 	"strings"
 )
 

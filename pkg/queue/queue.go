@@ -1,7 +1,7 @@
 package queue
 
 import (
-	model2 "state-example/pkg/model"
+	model2 "github.com/hamster-shared/a-line-cli/pkg/model"
 )
 
 type IQueue interface {

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"state-example/cmd"
-	"state-example/pkg/logger"
+	"github.com/hamster-shared/a-line-cli/cmd"
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
 
 	"github.com/sirupsen/logrus"
 )

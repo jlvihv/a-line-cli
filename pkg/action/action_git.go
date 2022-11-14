@@ -3,11 +3,11 @@ package action
 import (
 	"bufio"
 	"context"
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
+	"github.com/hamster-shared/a-line-cli/pkg/stream"
 	"os"
 	"os/exec"
 	"path"
-	"state-example/pkg/logger"
-	"state-example/pkg/stream"
 	"strings"
 	"syscall"
 )

@@ -11,7 +11,7 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use: "state-example",
+	Use: "github.com/hamster-shared/a-line-cli",
 	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Println("start")
 	},

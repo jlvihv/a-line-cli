@@ -1,10 +1,10 @@
 package pipeline
 
 import (
+	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"gopkg.in/yaml.v2"
 	"io"
 	"os"
-	"state-example/pkg/model"
 )
 
 // GetJob 根据文件获取job信息

@@ -1,12 +1,9 @@
 package model
 
-import "fmt"
-
-type Job struct {
-	Version string           `yaml:"version"`
-	Name    string           `yaml:"name"`
-	Stages  map[string]Stage `yaml:"stages"`
-}
+import (
+	"fmt"
+	"time"
+)
 
 type Status int
 
@@ -16,6 +13,12 @@ const (
 	STATUS_FAIL    Status = 2
 	STATUS_SUCCESS Status = 3
 )
+
+type Job struct {
+	Version string           `yaml:"version"`
+	Name    string           `yaml:"name"`
+	Stages  map[string]Stage `yaml:"stages"`
+}
 
 type JobDetail struct {
 	Id int
@@ -58,5 +61,30 @@ func (job *Job) StageSort() ([]StageDetail, error) {
 	}
 
 	return stageList, nil
+}
 
+type JobLog struct {
+	// 开始时间
+	StartTime time.Time
+	// 持续时间
+	Duration time.Duration
+
+	//日志内容
+	Content string
+
+	//最后一行 行号
+	LastLine int
+}
+
+type JobStageLog struct {
+	// 开始时间
+	StartTime time.Time
+	// 持续时间
+	Duration time.Duration
+
+	//日志内容
+	Content string
+
+	//最后一行 行号
+	LastLine int
 }

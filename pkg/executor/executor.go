@@ -68,7 +68,6 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), "stack", engineContext))
 
 	// 将取消hook 记录到内存中,用于中断程序
-	//TODO... 增加阻塞功能，一个 node 只允许执行一个pipeline 根据job.Name 阻塞（或加锁）
 	e.cancelMap[job.Name] = cancel
 
 	// 队列堆栈

@@ -23,8 +23,14 @@ type Job struct {
 type JobDetail struct {
 	Id int
 	Job
-	Status Status
-	Stages []StageDetail
+	Status    Status
+	Stages    []StageDetail
+	StartTime time.Time
+	Duration  time.Duration
+}
+
+func (jd *JobDetail) ToString() string {
+	return fmt.Sprintf("job: %s, Status: %d, StartTime: %s , Duration: %d, stages: [%v]", jd.Name, jd.Status, jd.StartTime, jd.Duration, jd.Stages)
 }
 
 // StageSort job 排序

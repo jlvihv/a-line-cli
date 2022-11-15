@@ -96,11 +96,12 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		return nil
 	}
 
-	for _, stageWapper := range stages {
+	for index, stageWapper := range jobWrapper.Stages {
 		//TODO ... stage的输出也需要换成堆栈方式
 		fmt.Println("stage : ", stageWapper.Name)
 		stageWapper.Status = model.STATUS_RUNNING
 		stageWapper.StartTime = time.Now()
+		jobWrapper.Stages[index] = stageWapper
 		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
 		for _, step := range stageWapper.Stage.Steps {
 			var ah action2.ActionHandler
@@ -116,6 +117,10 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 				ah = action2.NewGitAction(step.With["url"], step.With["branch"], ctx)
 				err = executeAction(ah, jobWrapper)
 			}
+			if strings.Contains(step.Uses, "/") {
+				ah = action2.NewRemoteAction(step.Uses, step.With, ctx)
+				err = executeAction(ah, jobWrapper)
+			}
 
 		}
 		for !stack.IsEmpty() {
@@ -123,7 +128,13 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 			_ = ah.Post()
 		}
 
+		if err != nil {
+			stageWapper.Status = model.STATUS_FAIL
+		} else {
+			stageWapper.Status = model.STATUS_SUCCESS
+		}
 		stageWapper.Duration = time.Now().Sub(stageWapper.StartTime)
+		jobWrapper.Stages[index] = stageWapper
 		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
 		if err != nil {
 			cancel()

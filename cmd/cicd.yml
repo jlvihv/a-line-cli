@@ -1,6 +1,10 @@
 version: 1.0
 name: my-test
 stages:
+  remote-action:
+    steps:
+      - name: remote-shell
+        uses: mohaijiang/hello-world-action
   git-clone:
     steps:
       - name: git-clone

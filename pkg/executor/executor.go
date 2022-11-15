@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io"
 	"strings"
+	"time"
 )
 
 type IExecutor interface {
@@ -74,6 +75,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	var stack utils.Stack[action2.ActionHandler]
 
 	jobWrapper.Status = model.STATUS_RUNNING
+	jobWrapper.StartTime = time.Now()
 
 	executeAction := func(ah action2.ActionHandler, job *model.JobDetail) error {
 		if jobWrapper.Status != model.STATUS_RUNNING {
@@ -98,6 +100,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		//TODO ... stage的输出也需要换成堆栈方式
 		fmt.Println("stage : ", stageWapper.Name)
 		stageWapper.Status = model.STATUS_RUNNING
+		stageWapper.StartTime = time.Now()
 		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
 		for _, step := range stageWapper.Stage.Steps {
 			var ah action2.ActionHandler
@@ -120,10 +123,13 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 			_ = ah.Post()
 		}
 
+		stageWapper.Duration = time.Now().Sub(stageWapper.StartTime)
+		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
 		if err != nil {
 			cancel()
 			break
 		}
+
 	}
 
 	delete(e.cancelMap, job.Name)
@@ -132,6 +138,9 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	} else {
 		jobWrapper.Status = model.STATUS_FAIL
 	}
+
+	jobWrapper.Duration = time.Now().Sub(jobWrapper.StartTime)
+	e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
 
 	//TODO ... 发送结果到队列
 	e.SendResultToQueue(nil)

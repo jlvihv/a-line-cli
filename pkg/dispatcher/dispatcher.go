@@ -2,78 +2,84 @@ package dispatcher
 
 import (
 	"github.com/hamster-shared/a-line-cli/pkg/executor"
-	model2 "github.com/hamster-shared/a-line-cli/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
 )
 
 type IDispatcher interface {
 	// DispatchNode 选择节点
-	DispatchNode(job *model2.Job) *model2.Node
+	DispatchNode(job *model.Job) *model.Node
 	// Register 节点注册
-	Register(node *model2.Node)
+	Register(node *model.Node)
 	// UnRegister 节点注销
-	UnRegister(node *model2.Node)
+	UnRegister(node *model.Node)
 
 	// HealthcheckNode 节点心跳
-	HealthcheckNode(node *model2.Node)
+	HealthcheckNode(node *model.Node)
 
 	// SendJob 发送任务
-	SendJob(job *model2.Job, node *model2.Node)
+	SendJob(job *model.Job, node *model.Node)
 
 	// CancelJob 取消任务
-	CancelJob(job *model2.Job, node *model2.Node)
+	CancelJob(job *model.Job, node *model.Node)
 
 	// GetExecutor 根据节点获取执行器
 	// TODO ... 这个方法设计的不好，分布式机构后应当用api代替
-	GetExecutor(node *model2.Node) executor.IExecutor
+	GetExecutor(node *model.Node) executor.IExecutor
 }
 
 type Dispatcher struct {
-	Channel chan model2.QueueMessage
+	Channel chan model.QueueMessage
+	nodes   []*model.Node
 }
 
-func NewDispatcher(channel chan model2.QueueMessage) *Dispatcher {
+func NewDispatcher(channel chan model.QueueMessage) *Dispatcher {
 	return &Dispatcher{
-		channel,
+		Channel: channel,
+		nodes:   make([]*model.Node, 0),
 	}
 }
 
 // DispatchNode 选择节点
-func (d *Dispatcher) DispatchNode(job *model2.Job) *model2.Node {
+func (d *Dispatcher) DispatchNode(job *model.Job) *model.Node {
 
 	//TODO ... 单机情况直接返回 本地
+	if len(d.nodes) > 0 {
+		return d.nodes[0]
+	}
 	return nil
 }
 
 // Register 节点注册
-func (d *Dispatcher) Register(node *model2.Node) {
+func (d *Dispatcher) Register(node *model.Node) {
+	d.nodes = append(d.nodes, node)
 	return
 }
 
 // UnRegister 节点注销
-func (d *Dispatcher) UnRegister(node *model2.Node) {
+func (d *Dispatcher) UnRegister(node *model.Node) {
 	return
 }
 
 // HealthcheckNode 节点心跳
-func (d *Dispatcher) HealthcheckNode(*model2.Node) {
+func (d *Dispatcher) HealthcheckNode(*model.Node) {
 	// TODO  ... 检查注册的心跳信息，超过3分钟没有更新的节点，踢掉
 	return
 }
 
 // SendJob 发送任务
-func (d *Dispatcher) SendJob(job *model2.Job, node *model2.Node) {
+func (d *Dispatcher) SendJob(job *model.Job, node *model.Node) {
 
 	// TODO ... 单机情况下 不考虑节点，直接发送本地
 	// TODO ... 集群情况下 通过注册的ip 地址进行api接口调用
 
-	d.Channel <- model2.NewStartQueueMsg(job.Name, 1)
+	d.Channel <- model.NewStartQueueMsg(job.Name, 1)
 
 	return
 }
 
 // CancelJob 取消任务
-func (d *Dispatcher) CancelJob(job *model2.Job, node *model2.Node) {
+func (d *Dispatcher) CancelJob(job *model.Job, node *model.Node) {
 
-	d.Channel <- model2.NewStopQueueMsg(job.Name, 1)
+	d.Channel <- model.NewStopQueueMsg(job.Name, 1)
 	return
 }

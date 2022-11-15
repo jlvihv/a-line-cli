@@ -27,7 +27,8 @@ type JobService struct {
 
 func NewJobService() *JobService {
 	return &JobService{
-		store: make(map[string]*model.Job),
+		store:   make(map[string]*model.Job),
+		details: make(map[string]*model.JobDetail),
 	}
 }
 

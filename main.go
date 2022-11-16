@@ -8,6 +8,6 @@ import (
 )
 
 func main() {
-	logger.Init().ToStdout().SetLevel(logrus.TraceLevel)
+	logger.Init().ToStdoutAndFile().SetLevel(logrus.TraceLevel)
 	cmd.Execute()
 }

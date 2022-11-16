@@ -3,14 +3,17 @@ package executor
 import (
 	"context"
 	"fmt"
-	action2 "github.com/hamster-shared/a-line-cli/pkg/action"
-	"github.com/hamster-shared/a-line-cli/pkg/model"
-	"github.com/hamster-shared/a-line-cli/pkg/service"
-	"github.com/hamster-shared/a-line-cli/pkg/utils"
-	"gopkg.in/yaml.v2"
 	"io"
 	"strings"
 	"time"
+
+	action2 "github.com/hamster-shared/a-line-cli/pkg/action"
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/output"
+	"github.com/hamster-shared/a-line-cli/pkg/service"
+	"github.com/hamster-shared/a-line-cli/pkg/utils"
+	"gopkg.in/yaml.v2"
 )
 
 type IExecutor interface {
@@ -38,7 +41,7 @@ type Executor struct {
 // FetchJob 获取任务
 func (e *Executor) FetchJob(name string) (io.Reader, error) {
 
-	//TODO... 根据name 从rpc 或 直接内部调用获取job的pipeline文件
+	//TODO... 根据 name 从 rpc 或 直接内部调用获取 job 的 pipeline 文件
 	job := e.jobService.GetJob(name)
 	data, err := yaml.Marshal(job)
 	return strings.NewReader(string(data)), err
@@ -47,9 +50,10 @@ func (e *Executor) FetchJob(name string) (io.Reader, error) {
 // Execute 执行任务
 func (e *Executor) Execute(id int, job *model.Job) error {
 
-	// 1. 解析对pipeline 进行任务排序
+	// 1. 解析对 pipeline 进行任务排序
 	stages, err := job.StageSort()
 	jobWrapper := &model.JobDetail{
+		Id:     id,
 		Job:    *job,
 		Status: model.STATUS_NOTRUN,
 		Stages: stages,
@@ -68,7 +72,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 
 	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), "stack", engineContext))
 
-	// 将取消hook 记录到内存中,用于中断程序
+	// 将取消 hook 记录到内存中，用于中断程序
 	e.cancelMap[job.Name] = cancel
 
 	// 队列堆栈
@@ -96,24 +100,32 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		return nil
 	}
 
-	for _, stageWapper := range stages {
-		//TODO ... stage的输出也需要换成堆栈方式
-		fmt.Println("stage : ", stageWapper.Name)
+	out := output.New(job.Name, jobWrapper.Id)
+
+	for index, stageWapper := range jobWrapper.Stages {
+		//TODO ... stage 的输出也需要换成堆栈方式
+		logger.Info("stage: {")
+		logger.Infof("   // %s", stageWapper.Name)
 		stageWapper.Status = model.STATUS_RUNNING
 		stageWapper.StartTime = time.Now()
+		jobWrapper.Stages[index] = stageWapper
 		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
 		for _, step := range stageWapper.Stage.Steps {
 			var ah action2.ActionHandler
 			if step.RunsOn != "" {
-				ah = action2.NewDockerEnv(step.RunsOn, ctx)
+				ah = action2.NewDockerEnv(step.RunsOn, ctx, out)
 				err = executeAction(ah, jobWrapper)
 			}
 			if step.Uses == "" {
-				ah = action2.NewShellAction(step.Run, ctx)
+				ah = action2.NewShellAction(step.Run, ctx, out)
 				err = executeAction(ah, jobWrapper)
 			}
 			if step.Uses == "git-checkout" {
-				ah = action2.NewGitAction(step.With["url"], step.With["branch"], ctx)
+				ah = action2.NewGitAction(step.With["url"], step.With["branch"], ctx, out)
+				err = executeAction(ah, jobWrapper)
+			}
+			if strings.Contains(step.Uses, "/") {
+				ah = action2.NewRemoteAction(step.Uses, step.With, ctx)
 				err = executeAction(ah, jobWrapper)
 			}
 
@@ -123,14 +135,22 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 			_ = ah.Post()
 		}
 
+		if err != nil {
+			stageWapper.Status = model.STATUS_FAIL
+		} else {
+			stageWapper.Status = model.STATUS_SUCCESS
+		}
 		stageWapper.Duration = time.Now().Sub(stageWapper.StartTime)
+		jobWrapper.Stages[index] = stageWapper
 		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
+		logger.Info("}")
 		if err != nil {
 			cancel()
 			break
 		}
 
 	}
+	out.Done()
 
 	delete(e.cancelMap, job.Name)
 	if err == nil {

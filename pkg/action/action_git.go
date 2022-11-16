@@ -3,13 +3,15 @@ package action
 import (
 	"bufio"
 	"context"
-	"github.com/hamster-shared/a-line-cli/pkg/logger"
-	"github.com/hamster-shared/a-line-cli/pkg/stream"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
 	"syscall"
+
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
+	"github.com/hamster-shared/a-line-cli/pkg/output"
 )
 
 // GitAction git clone
@@ -17,21 +19,24 @@ type GitAction struct {
 	repository string
 	branch     string
 	workdir    string
+	output     *output.Output
 	ctx        context.Context
 }
 
-func NewGitAction(repository, branch string, ctx context.Context) *GitAction {
+func NewGitAction(repository, branch string, ctx context.Context, output *output.Output) *GitAction {
 
 	return &GitAction{
 		repository: repository,
 		branch:     branch,
 		ctx:        ctx,
+		output:     output,
 	}
 }
 
 func (a *GitAction) Pre() error {
+	a.output.NewStage("git")
 
-	//TODO ... 检验git 命令是否存在
+	//TODO ... 检验 git 命令是否存在
 	return nil
 }
 
@@ -52,6 +57,7 @@ func (a *GitAction) Hook() error {
 	c := exec.CommandContext(a.ctx, commands[0], commands[1:]...) // mac linux
 	c.Dir = hamsterRoot
 	logger.Debugf("execute git clone command: %s", strings.Join(commands, " "))
+	a.output.WriteCommandLine(strings.Join(commands, " "))
 
 	stdout, err := c.StdoutPipe()
 	if err != nil {
@@ -88,12 +94,14 @@ func (a *GitAction) Hook() error {
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stdoutScanner.Scan() {
-			stream.OutputCh <- stdoutScanner.Text()
+			fmt.Println(stdoutScanner.Text())
+			a.output.WriteLine(stdoutScanner.Text())
 		}
 	}()
 	go func() {
 		for stderrScanner.Scan() {
-			stream.OutputCh <- stderrScanner.Text()
+			fmt.Println(stderrScanner.Text())
+			a.output.WriteLine(stderrScanner.Text())
 		}
 	}()
 

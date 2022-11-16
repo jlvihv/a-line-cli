@@ -52,7 +52,16 @@ func (c *ExecutorClient) Main() {
 		job, err := pipeline.GetJobFromReader(pipelineReader)
 
 		//6. 异步执行pipeline
-		go c.executor.Execute(jobId, job)
+		go func() {
+			err := c.executor.Execute(jobId, job)
+			if err != nil {
+
+			}
+		}()
 
 	}
+}
+
+func (c *ExecutorClient) Execute(jobId int, job *model.Job) error {
+	return c.executor.Execute(jobId, job)
 }

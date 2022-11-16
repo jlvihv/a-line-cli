@@ -30,7 +30,11 @@ type JobDetail struct {
 }
 
 func (jd *JobDetail) ToString() string {
-	return fmt.Sprintf("job: %s, Status: %d, StartTime: %s , Duration: %d, stages: [%v]", jd.Name, jd.Status, jd.StartTime, jd.Duration, jd.Stages)
+	str := ""
+	for _, s := range jd.Stages {
+		str += s.ToString() + "\n"
+	}
+	return fmt.Sprintf("job: %s, Status: %d, StartTime: %s , Duration: %d, stages: [\n%s]", jd.Name, jd.Status, jd.StartTime, jd.Duration, str)
 }
 
 // StageSort job 排序

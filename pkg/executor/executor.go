@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	action2 "github.com/hamster-shared/a-line-cli/pkg/action"
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"github.com/hamster-shared/a-line-cli/pkg/service"
 	"github.com/hamster-shared/a-line-cli/pkg/utils"
@@ -50,6 +51,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	// 1. 解析对pipeline 进行任务排序
 	stages, err := job.StageSort()
 	jobWrapper := &model.JobDetail{
+		Id:     id,
 		Job:    *job,
 		Status: model.STATUS_NOTRUN,
 		Stages: stages,
@@ -98,7 +100,8 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 
 	for index, stageWapper := range jobWrapper.Stages {
 		//TODO ... stage的输出也需要换成堆栈方式
-		fmt.Println("stage : ", stageWapper.Name)
+		logger.Info("stage: {")
+		logger.Infof("   // %s", stageWapper.Name)
 		stageWapper.Status = model.STATUS_RUNNING
 		stageWapper.StartTime = time.Now()
 		jobWrapper.Stages[index] = stageWapper
@@ -136,6 +139,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		stageWapper.Duration = time.Now().Sub(stageWapper.StartTime)
 		jobWrapper.Stages[index] = stageWapper
 		e.jobService.SaveJobDetail(jobWrapper.Name, jobWrapper)
+		logger.Info("}")
 		if err != nil {
 			cancel()
 			break

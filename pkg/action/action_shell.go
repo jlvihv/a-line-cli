@@ -94,6 +94,7 @@ func (a *ShellAction) Hook() error {
 			<-a.ctx.Done()
 			if a.ctx.Err() != nil {
 				logger.Errorf("shell command error: %v", a.ctx.Err())
+				return
 			} else {
 				p := c.Process
 				if p == nil {

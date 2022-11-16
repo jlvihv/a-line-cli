@@ -1,37 +1,87 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+*/
 package cmd
 
 import (
-	_ "embed"
 	"fmt"
-	"github.com/spf13/cobra"
+	"github.com/hamster-shared/a-line-cli/pkg/executor"
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
+	"github.com/hamster-shared/a-line-cli/pkg/pipeline"
+	"github.com/hamster-shared/a-line-cli/pkg/service"
 	"os"
-	"strings"
+	"path"
+
+	"github.com/spf13/cobra"
 )
 
-//go:embed cicd.yml
-var content string
-
+// rootCmd represents the base command when called without any subcommands
 var (
-	yamlFile string
+	pipelineFile string
+	jobService   = service.NewJobService()
+	rootCmd      = &cobra.Command{
+		Use:   "a-line-cli",
+		Short: "A brief description of your application",
+		Long: `A longer description that spans multiple lines and likely contains
+examples and usage of using your application. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
+		// Uncomment the following line if your bare application
+		// has an action associated with it:
+		Run: func(cmd *cobra.Command, args []string) {
+			wd, _ := os.Getwd()
+			cicdFile, err := os.Open(path.Join(wd, pipelineFile))
+			if err != nil {
+				fmt.Println("file error")
+				return
+			}
+
+			channel := make(chan model.QueueMessage)
+			// 启动executor
+
+			executeClient := executor.NewExecutorClient(channel, jobService)
+			defer close(channel)
+
+			job, _ := pipeline.GetJobFromReader(cicdFile)
+			jobService.SaveJob(job.Name, job)
+			Stages, _ := job.StageSort()
+			jobDetail := &model.JobDetail{
+				Id:     1,
+				Job:    *job,
+				Status: model.STATUS_NOTRUN,
+				Stages: Stages,
+			}
+			jobService.SaveJobDetail(job.Name, jobDetail)
+
+			err = executeClient.Execute(1, job)
+			if err != nil {
+				logger.Error("err:", err)
+			}
+
+		},
+	}
 )
 
-var rootCmd = &cobra.Command{
-	Use: "github.com/hamster-shared/a-line-cli",
-	Run: func(_ *cobra.Command, _ []string) {
-		fmt.Println("start")
-
-		Main(strings.NewReader(content))
-
-	},
-}
-
+// Execute adds all child commands to the root command and sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	err := rootCmd.Execute()
+	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&yamlFile, "file", "f", "cicd.yaml", "yaml config file")
+	// Here you will define your flags and configuration settings.
+	// Cobra supports persistent flags, which, if defined here,
+	// will be global for your application.
+
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.a-line-cli.yaml)")
+
+	// Cobra also supports local flags, which will only run
+	// when this action is called directly.
+	rootCmd.Flags().StringVar(&pipelineFile, "f", "cicd.yml", "pipeline file")
 }

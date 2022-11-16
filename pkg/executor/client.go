@@ -56,3 +56,7 @@ func (c *ExecutorClient) Main() {
 
 	}
 }
+
+func (c *ExecutorClient) Execute(jobId int, job *model.Job) error {
+	return c.executor.Execute(jobId, job)
+}

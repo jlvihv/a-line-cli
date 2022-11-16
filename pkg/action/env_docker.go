@@ -3,7 +3,6 @@ package action
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"os"
 	"os/exec"
@@ -42,9 +41,10 @@ func (e *DockerEnv) Pre() error {
 
 	_ = os.MkdirAll(workdirTmp, os.ModePerm)
 
-	user := fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid())
+	//user := fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid())
+	// "-u", user,
 
-	commands := []string{"docker", "run", "-u", user, "-t", "-d", "-v", workdir + ":" + workdir, "-v", workdirTmp + ":" + workdirTmp, "-w", workdir, e.Image, "cat"}
+	commands := []string{"docker", "run", "-t", "-d", "-v", workdir + ":" + workdir, "-v", workdirTmp + ":" + workdirTmp, "-w", workdir, e.Image, "cat"}
 	logger.Debugf("execute docker command: %s", strings.Join(commands, " "))
 	c := exec.Command(commands[0], commands[1:]...)
 	output, err := c.CombinedOutput()

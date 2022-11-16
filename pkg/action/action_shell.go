@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"context"
 	"errors"
-	"github.com/hamster-shared/a-line-cli/pkg/logger"
-	"github.com/hamster-shared/a-line-cli/pkg/stream"
-	"github.com/hamster-shared/a-line-cli/pkg/utils"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 	"syscall"
+
+	"github.com/hamster-shared/a-line-cli/pkg/logger"
+	"github.com/hamster-shared/a-line-cli/pkg/output"
+	"github.com/hamster-shared/a-line-cli/pkg/utils"
 )
 
 // ShellAction 命令工作
@@ -18,13 +20,15 @@ type ShellAction struct {
 	command  string
 	filename string
 	ctx      context.Context
+	output   *output.Output
 }
 
-func NewShellAction(command string, ctx context.Context) *ShellAction {
+func NewShellAction(command string, ctx context.Context, output *output.Output) *ShellAction {
 
 	return &ShellAction{
 		command: command,
 		ctx:     ctx,
+		output:  output,
 	}
 }
 
@@ -55,6 +59,8 @@ func (a *ShellAction) Pre() error {
 
 func (a *ShellAction) Hook() error {
 
+	a.output.NewStage("shell")
+
 	stack := a.ctx.Value(STACK).(map[string]interface{})
 
 	workdir, ok := stack["workdir"].(string)
@@ -76,6 +82,7 @@ func (a *ShellAction) Hook() error {
 	c := exec.CommandContext(a.ctx, commands[0], commands[1:]...) // mac linux
 	c.Dir = workdir
 	logger.Debugf("execute shell command: %s", strings.Join(commands, " "))
+	a.output.WriteCommandLine(strings.Join(commands, " "))
 
 	stdout, err := c.StdoutPipe()
 	if err != nil {
@@ -113,12 +120,14 @@ func (a *ShellAction) Hook() error {
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stdoutScanner.Scan() {
-			stream.OutputCh <- stdoutScanner.Text()
+			fmt.Println(stdoutScanner.Text())
+			a.output.WriteLine(stdoutScanner.Text())
 		}
 	}()
 	go func() {
 		for stderrScanner.Scan() {
-			stream.OutputCh <- stderrScanner.Text()
+			fmt.Println(stderrScanner.Text())
+			a.output.WriteLine(stderrScanner.Text())
 		}
 	}()
 

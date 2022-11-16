@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/hamster-shared/a-line-cli/pkg/consts"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -83,34 +84,27 @@ func DefaultConfigDir() string {
 	return dir
 }
 
-func CreateJobDir() {
-	//determine whether the folder exists
-	_, err := os.Stat(filepath.Join(DefaultConfigDir(), consts.JOB_DIR_NAME))
-	if err == nil {
-		return
+// SlicePage paging   return:page,pageSize,start,end
+func SlicePage(page, pageSize, nums int) (int, int, int, int) {
+	if page <= 0 {
+		page = 1
 	}
-	if os.IsNotExist(err) {
-		// create pipeline dir
-		err := os.MkdirAll(filepath.Join(DefaultConfigDir(), consts.JOB_DIR_NAME), os.ModePerm)
-		if err != nil {
-			log.Println("create pipeline job dir failed", err)
-			return
-		}
+	if pageSize < 0 {
+		pageSize = 10
 	}
-}
+	if pageSize > nums {
+		return page, pageSize, 0, nums
+	}
+	// total page
+	pageCount := int(math.Ceil(float64(nums) / float64(pageSize)))
+	if page > pageCount {
+		return page, pageSize, 0, 0
+	}
+	sliceStart := (page - 1) * pageSize
+	sliceEnd := sliceStart + pageSize
 
-func CreateJobDetailDir() {
-	//determine whether the folder exists
-	_, err := os.Stat(filepath.Join(DefaultConfigDir(), consts.JOB_DETAIL_DIR_NAME))
-	if err == nil {
-		return
+	if sliceEnd > nums {
+		sliceEnd = nums
 	}
-	if os.IsNotExist(err) {
-		// create pipeline dir
-		err := os.MkdirAll(filepath.Join(DefaultConfigDir(), consts.JOB_DETAIL_DIR_NAME), os.ModePerm)
-		if err != nil {
-			log.Println("create pipeline job detail dir failed", err)
-			return
-		}
-	}
+	return page, pageSize, sliceStart, sliceEnd
 }

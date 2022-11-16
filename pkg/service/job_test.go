@@ -114,7 +114,7 @@ func Test_UpdateJob(t *testing.T) {
 			},
 		},
 	}
-	err := jobService.UpdateJob("sun", &job)
+	err := jobService.UpdateJob("guo", "jian", &job)
 	ass.NilError(t, err)
 }
 

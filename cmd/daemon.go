@@ -42,7 +42,7 @@ func Main(reader io.Reader) {
 	ticker := time.NewTicker(1000 * time.Millisecond)
 	done := make(chan bool)
 
-	detail := jobService.GetJobDetail(job.Name)
+	detail := jobService.GetJobDetail(job.Name, 1)
 
 	go func() {
 		for {
@@ -51,7 +51,7 @@ func Main(reader io.Reader) {
 				return
 			case t := <-ticker.C:
 				fmt.Println("Tick at", t)
-				detail = jobService.GetJobDetail(job.Name)
+				detail = jobService.GetJobDetail(job.Name, 1)
 				if detail != nil {
 					fmt.Println(detail.ToString())
 

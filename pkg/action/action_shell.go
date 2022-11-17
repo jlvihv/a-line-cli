@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"os"
 	"os/exec"
 	"strings"
@@ -57,7 +58,7 @@ func (a *ShellAction) Pre() error {
 	return err
 }
 
-func (a *ShellAction) Hook() error {
+func (a *ShellAction) Hook() (*model.ActionResult, error) {
 
 	a.output.NewStage("shell")
 
@@ -65,7 +66,7 @@ func (a *ShellAction) Hook() error {
 
 	workdir, ok := stack["workdir"].(string)
 	if !ok {
-		return errors.New("workdir is empty")
+		return nil, errors.New("workdir is empty")
 	}
 	logger.Infof("shell stack: %v", stack)
 
@@ -81,18 +82,19 @@ func (a *ShellAction) Hook() error {
 
 	c := exec.CommandContext(a.ctx, commands[0], commands[1:]...) // mac linux
 	c.Dir = workdir
+
 	logger.Debugf("execute shell command: %s", strings.Join(commands, " "))
 	a.output.WriteCommandLine(strings.Join(commands, " "))
 
 	stdout, err := c.StdoutPipe()
 	if err != nil {
 		logger.Errorf("stdout error: %v", err)
-		return err
+		return nil, err
 	}
 	stderr, err := c.StderrPipe()
 	if err != nil {
 		logger.Errorf("stderr error: %v", err)
-		return err
+		return nil, err
 	}
 
 	go func() {
@@ -134,17 +136,17 @@ func (a *ShellAction) Hook() error {
 	err = c.Start()
 	if err != nil {
 		logger.Errorf("shell command start error: %v", err)
-		return err
+		return nil, err
 	}
 
 	err = c.Wait()
 	if err != nil {
 		logger.Errorf("shell command wait error: %v", err)
-		return err
+		return nil, err
 	}
 
 	logger.Info("execute shell command success")
-	return err
+	return nil, err
 }
 
 func (a *ShellAction) Post() error {

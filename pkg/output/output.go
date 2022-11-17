@@ -245,10 +245,7 @@ func (o *Output) initFile() error {
 
 // Filename 返回文件名
 func (o *Output) Filename() string {
-	if o.f == nil {
-		return ""
-	}
-	return o.f.Name()
+	return o.filename
 }
 
 // StageOutputList 返回存储了 Stage 输出的列表

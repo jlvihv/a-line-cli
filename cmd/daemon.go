@@ -5,7 +5,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/hamster-shared/a-line-cli/pkg/http"
+	"github.com/hamster-shared/a-line-cli/pkg/controller"
 
 	"github.com/spf13/cobra"
 )
@@ -23,7 +23,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("daemon called")
 
-		http.NewHttpService(jobService).StartHttpServer()
+		controller.NewHttpService(jobService).StartHttpServer()
 
 	},
 }

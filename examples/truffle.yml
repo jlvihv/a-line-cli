@@ -13,14 +13,20 @@ stages:
       - git-clone
     steps:
       - name: code-compile
-        runs-on: maven:3.5-jdk-8
+        runs-on: node:16
         run: |
           npm install -g truffle
+          npm install
           truffle compile
 
-  build-image:
+  solidity-lint:
     needs:
       - code-compile
     steps:
-      - run: |
-          docker build -t mohaijiang/spring-boot-example:20221109 .
+      - name: solidity-check
+        runs-on: node:16
+        run: |
+          npm install -g ethlint
+          solium --init
+          solium -d contracts/
+

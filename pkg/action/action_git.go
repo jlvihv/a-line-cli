@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"os"
 	"os/exec"
 	"path"
@@ -40,7 +41,7 @@ func (a *GitAction) Pre() error {
 	return nil
 }
 
-func (a *GitAction) Hook() error {
+func (a *GitAction) Hook() (*model.ActionResult, error) {
 
 	stack := a.ctx.Value(STACK).(map[string]interface{})
 
@@ -62,12 +63,12 @@ func (a *GitAction) Hook() error {
 	stdout, err := c.StdoutPipe()
 	if err != nil {
 		logger.Errorf("stdout error: %v", err)
-		return err
+		return nil, err
 	}
 	stderr, err := c.StderrPipe()
 	if err != nil {
 		logger.Errorf("stderr error: %v", err)
-		return err
+		return nil, err
 	}
 
 	go func() {
@@ -110,19 +111,19 @@ func (a *GitAction) Hook() error {
 	err = c.Start()
 	if err != nil {
 		logger.Errorf("git clone error: %v", err)
-		return err
+		return nil, err
 	}
 
 	err = c.Wait()
 	if err != nil {
 		logger.Errorf("git clone error: %v", err)
-		return err
+		return nil, err
 	}
 	logger.Info("git clone success")
 
 	a.workdir = path.Join(hamsterRoot, pipelineName)
 	stack["workdir"] = a.workdir
-	return nil
+	return nil, nil
 }
 
 func (a *GitAction) Post() error {

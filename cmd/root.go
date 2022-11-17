@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/hamster-shared/a-line-cli/pkg/controller"
 	"github.com/hamster-shared/a-line-cli/pkg/executor"
 	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
@@ -18,9 +19,10 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var (
-	pipelineFile string
-	jobService   = service.NewJobService()
-	rootCmd      = &cobra.Command{
+	pipelineFile  string
+	jobService    = service.NewJobService()
+	handlerServer = controller.NewHandlerServer(jobService)
+	rootCmd       = &cobra.Command{
 		Use:   "a-line-cli",
 		Short: "A brief description of your application",
 		Long: `A longer description that spans multiple lines and likely contains
@@ -32,8 +34,8 @@ to quickly create a Cobra application.`,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
 		Run: func(cmd *cobra.Command, args []string) {
-			wd, _ := os.Getwd()
-			cicdFile, err := os.Open(path.Join(wd, pipelineFile))
+			//wd, _ := os.Getwd()
+			cicdFile, err := os.Open(path.Join(pipelineFile))
 			if err != nil {
 				fmt.Println("file error")
 				return
@@ -83,5 +85,5 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().StringVar(&pipelineFile, "f", "cicd.yml", "pipeline file")
+	rootCmd.Flags().StringVar(&pipelineFile, "file", "cicd.yml", "pipeline file")
 }

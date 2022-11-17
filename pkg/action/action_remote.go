@@ -59,11 +59,11 @@ func (a *RemoteAction) Pre() error {
 	return err
 }
 
-func (a *RemoteAction) Hook() error {
+func (a *RemoteAction) Hook() (*model.ActionResult, error) {
 
 	file, err := os.Open(path.Join(a.actionRoot, "action.yml"))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	yamlFile, err := io.ReadAll(file)
 	var remoteAction model.RemoteAction
@@ -85,7 +85,7 @@ func (a *RemoteAction) Hook() error {
 		fmt.Println(string(output))
 	}
 
-	return err
+	return nil, err
 }
 
 func (a *RemoteAction) Post() error {

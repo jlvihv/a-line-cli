@@ -13,23 +13,26 @@ import (
 )
 
 type Output struct {
-	Name         string
-	ID           int
-	buffer       []string
-	f            *os.File
-	mu           sync.Mutex
-	filename     string
-	done         bool
-	fileCursor   int
-	bufferCursor int
+	Name           string
+	ID             int
+	StartTime      time.Time
+	buffer         []string
+	f              *os.File
+	mu             sync.Mutex
+	filename       string
+	done           bool
+	fileCursor     int
+	bufferCursor   int
+	stageStartTime map[string]time.Time
 }
 
 // New 新建一个 Output 对象，会自动初始化文件，以及定时将内容写入文件
 func New(name string, id int) *Output {
 	o := &Output{
-		Name:   name,
-		ID:     id,
-		buffer: make([]string, 0, 16),
+		Name:      name,
+		ID:        id,
+		StartTime: time.Now().Local(),
+		buffer:    make([]string, 0, 16),
 	}
 
 	err := o.initFile()
@@ -40,9 +43,26 @@ func New(name string, id int) *Output {
 
 	o.timedWriteFile()
 
-	o.WriteLine("[Job] Started on " + time.Now().Local().Format("2006-01-02 15:04:05"))
+	o.WriteLine("[Job] Started on " + o.StartTime.Format("2006-01-02 15:04:05"))
 
 	return o
+}
+
+// Duration 返回持续时间
+func (o *Output) Duration() time.Duration {
+	return time.Since(o.StartTime)
+}
+
+// StageDuration 返回某个 Stage 的持续时间
+func (o *Output) StageDuration(name string) time.Duration {
+	stageStartTime, ok := o.stageStartTime[name]
+	if !ok {
+		return 0
+	}
+	if stageStartTime.IsZero() {
+		return 0
+	}
+	return time.Since(o.stageStartTime[name])
 }
 
 // Done 标记输出已完成，会将缓存中的内容刷入文件，然后关闭文件
@@ -93,6 +113,7 @@ func (o *Output) NewStage(name string) {
 	o.WriteLine("\n")
 	o.WriteLine("\n")
 	o.WriteLine("[Pipeline] Stage: " + name)
+	o.stageStartTime[name] = time.Now().Local()
 }
 
 // 在一个协程中定时刷入文件

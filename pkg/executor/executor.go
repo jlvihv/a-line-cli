@@ -65,10 +65,14 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 
 	// 2. 初始化 执行器的上下文
 
+	env := make([]string, 0)
+	env = append(env, "NAME="+job.Name)
+
 	engineContext := make(map[string]interface{})
 	engineContext["hamsterRoot"] = "/tmp/example"
 	engineContext["workdir"] = "/tmp/example"
 	engineContext["name"] = job.Name
+	engineContext["env"] = env
 
 	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), "stack", engineContext))
 

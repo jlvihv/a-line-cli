@@ -69,6 +69,7 @@ func (a *ShellAction) Hook() (*model.ActionResult, error) {
 		return nil, errors.New("workdir is empty")
 	}
 	logger.Infof("shell stack: %v", stack)
+	env, ok := stack["env"].([]string)
 
 	commands := []string{"sh", "-c", a.filename}
 	val, ok := stack["withEnv"]
@@ -82,6 +83,7 @@ func (a *ShellAction) Hook() (*model.ActionResult, error) {
 
 	c := exec.CommandContext(a.ctx, commands[0], commands[1:]...) // mac linux
 	c.Dir = workdir
+	c.Env = env
 
 	logger.Debugf("execute shell command: %s", strings.Join(commands, " "))
 	a.output.WriteCommandLine(strings.Join(commands, " "))

@@ -2,6 +2,11 @@ package model
 
 import (
 	"fmt"
+	"github.com/hamster-shared/a-line-cli/pkg/utils"
+	"io"
+	"os"
+	"path"
+	"strconv"
 	"time"
 )
 
@@ -27,6 +32,7 @@ type JobDetail struct {
 	Stages    []StageDetail
 	StartTime time.Time
 	Duration  time.Duration
+	ActionResult
 }
 
 func (jd *JobDetail) ToString() string {
@@ -71,6 +77,35 @@ func (job *Job) StageSort() ([]StageDetail, error) {
 	}
 
 	return stageList, nil
+}
+
+func (jd *JobDetail) AddArtifactory(file *os.File) error {
+	arti := Artifactory{
+		Name: file.Name(),
+		Url:  fmt.Sprintf("/artifactory/%s/%d/%s", jd.Name, jd.Id, file.Name()),
+	}
+	dir := path.Join(utils.DefaultConfigDir(), "artifactory", jd.Name, strconv.Itoa(jd.Id))
+	_ = os.MkdirAll(dir, os.ModePerm)
+
+	fullPath := path.Join(dir, file.Name())
+
+	destination, err := os.Create(fullPath)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(destination, file)
+	if err != nil {
+		return err
+	}
+
+	if len(jd.Artifactorys) > 0 {
+		jd.Artifactorys = append(jd.Artifactorys, arti)
+	} else {
+		jd.Artifactorys = make([]Artifactory, 0)
+		jd.Artifactorys = append(jd.Artifactorys, arti)
+	}
+	return nil
 }
 
 type JobLog struct {

@@ -3,6 +3,7 @@ package action
 import (
 	"context"
 	"errors"
+	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"os"
 	"os/exec"
 	"strings"
@@ -66,7 +67,7 @@ func (e *DockerEnv) Pre() error {
 	return err
 }
 
-func (e *DockerEnv) Hook() error {
+func (e *DockerEnv) Hook() (*model.ActionResult, error) {
 
 	c := exec.Command("docker", "top", e.containerID, "-eo", "pid,comm")
 	logger.Debugf("execute docker command: %s", strings.Join(c.Args, " "))
@@ -78,12 +79,12 @@ func (e *DockerEnv) Hook() error {
 
 	if err != nil {
 		logger.Errorf("execute docker command error: %s", err.Error())
-		return err
+		return nil, err
 	}
 
 	stack := e.ctx.Value(STACK).(map[string]interface{})
 	stack["withEnv"] = []string{"docker", "exec", e.containerID}
-	return nil
+	return nil, nil
 }
 
 func (e *DockerEnv) Post() error {

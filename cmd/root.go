@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/hamster-shared/a-line-cli/pkg/controller"
 	"github.com/hamster-shared/a-line-cli/pkg/executor"
 	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
@@ -18,9 +19,10 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var (
-	pipelineFile string
-	jobService   = service.NewJobService()
-	rootCmd      = &cobra.Command{
+	pipelineFile  string
+	jobService    = service.NewJobService()
+	handlerServer = controller.NewHandlerServer(jobService)
+	rootCmd       = &cobra.Command{
 		Use:   "a-line-cli",
 		Short: "A brief description of your application",
 		Long: `A longer description that spans multiple lines and likely contains

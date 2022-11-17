@@ -114,19 +114,42 @@ func Test_UpdateJob(t *testing.T) {
 			},
 		},
 	}
-	err := jobService.UpdateJob("sun", &job)
+	err := jobService.UpdateJob("guo", "jian", &job)
 	ass.NilError(t, err)
 }
 
 func Test_GetJobDetail(t *testing.T) {
 	jobService := NewJobService()
 	data := jobService.GetJobDetail("sun", 3)
-	log.Println(data)
 	assert.NotNil(t, data)
 }
 
 func Test_DeleteJob(t *testing.T) {
-	jobservice := NewJobService()
-	err := jobservice.DeleteJob("sun")
+	jobService := NewJobService()
+	err := jobService.DeleteJob("sun")
 	ass.NilError(t, err)
+}
+
+func Test_DeleteJobDetail(t *testing.T) {
+	jobService := NewJobService()
+	err := jobService.DeleteJobDetail("cdqadqa92d3if4r9n8j0", 1)
+	ass.NilError(t, err)
+}
+
+func Test_JobList(t *testing.T) {
+	jobService := NewJobService()
+	data := jobService.JobList("cdqadqa92d3if4r9n8j0", 1, 10)
+	assert.NotNil(t, data)
+}
+
+func Test_JobDetailList(t *testing.T) {
+	jobService := NewJobService()
+	data := jobService.JobDetailList("sun", 2, 10)
+	log.Println(data)
+	assert.NotNil(t, data)
+}
+
+func Test_ExecuteJob(t *testing.T) {
+	jobService := NewJobService()
+	jobService.ExecuteJob("sun")
 }

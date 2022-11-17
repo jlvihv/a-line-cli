@@ -133,3 +133,17 @@ type JobStageLog struct {
 	//最后一行 行号
 	LastLine int
 }
+
+type JobPage struct {
+	Data     []Job
+	Total    int
+	Page     int
+	PageSize int
+}
+
+type JobDetailPage struct {
+	Data     []JobDetail
+	Total    int
+	Page     int
+	PageSize int
+}

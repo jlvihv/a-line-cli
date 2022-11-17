@@ -92,7 +92,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 			return err
 		}
 		stack.Push(ah)
-		err = ah.Hook()
+		_, err = ah.Hook()
 		if err != nil {
 			job.Status = model.STATUS_FAIL
 			return err

@@ -23,7 +23,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("daemon called")
 
-		controller.NewHttpService(jobService).StartHttpServer()
+		controller.NewHttpService(*handlerServer).StartHttpServer()
 
 	},
 }

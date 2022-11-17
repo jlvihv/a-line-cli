@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
@@ -22,10 +23,10 @@ type RemoteAction struct {
 	actionRoot string
 }
 
-func NewRemoteAction(name string, args map[string]string, ctx context.Context) *RemoteAction {
+func NewRemoteAction(step model.Step, ctx context.Context) *RemoteAction {
 	return &RemoteAction{
-		name: name,
-		args: args,
+		name: step.Uses,
+		args: step.With,
 		ctx:  ctx,
 	}
 }
@@ -61,6 +62,12 @@ func (a *RemoteAction) Pre() error {
 
 func (a *RemoteAction) Hook() (*model.ActionResult, error) {
 
+	stack := a.ctx.Value(STACK).(map[string]interface{})
+	env, ok := stack["env"].([]string)
+	if !ok {
+		return nil, errors.New("env cannot be empty")
+	}
+
 	file, err := os.Open(path.Join(a.actionRoot, "action.yml"))
 	if err != nil {
 		return nil, err
@@ -68,6 +75,10 @@ func (a *RemoteAction) Hook() (*model.ActionResult, error) {
 	yamlFile, err := io.ReadAll(file)
 	var remoteAction model.RemoteAction
 	err = yaml.Unmarshal(yamlFile, &remoteAction)
+
+	for envName, _ := range remoteAction.Input {
+		env = append(env, fmt.Sprintf("%s=%s", envName, a.args[envName]))
+	}
 
 	for index, step := range remoteAction.Runs.Steps {
 		args := make([]string, 0)
@@ -81,6 +92,7 @@ func (a *RemoteAction) Hook() (*model.ActionResult, error) {
 
 		cmd := utils.NewCommand(a.ctx, step.Shell, args...)
 		cmd.Dir = a.actionRoot
+		cmd.Env = env
 		output, _ := cmd.CombinedOutput()
 		fmt.Println(string(output))
 	}

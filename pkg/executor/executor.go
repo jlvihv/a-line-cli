@@ -117,19 +117,19 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		for _, step := range stageWapper.Stage.Steps {
 			var ah action2.ActionHandler
 			if step.RunsOn != "" {
-				ah = action2.NewDockerEnv(step.RunsOn, ctx, out)
+				ah = action2.NewDockerEnv(step, ctx, out)
 				err = executeAction(ah, jobWrapper)
 			}
 			if step.Uses == "" {
-				ah = action2.NewShellAction(step.Run, ctx, out)
+				ah = action2.NewShellAction(step, ctx, out)
 				err = executeAction(ah, jobWrapper)
 			}
 			if step.Uses == "git-checkout" {
-				ah = action2.NewGitAction(step.With["url"], step.With["branch"], ctx, out)
+				ah = action2.NewGitAction(step, ctx, out)
 				err = executeAction(ah, jobWrapper)
 			}
 			if strings.Contains(step.Uses, "/") {
-				ah = action2.NewRemoteAction(step.Uses, step.With, ctx)
+				ah = action2.NewRemoteAction(step, ctx)
 				err = executeAction(ah, jobWrapper)
 			}
 

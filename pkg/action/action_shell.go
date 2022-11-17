@@ -24,10 +24,10 @@ type ShellAction struct {
 	output   *output.Output
 }
 
-func NewShellAction(command string, ctx context.Context, output *output.Output) *ShellAction {
+func NewShellAction(step model.Step, ctx context.Context, output *output.Output) *ShellAction {
 
 	return &ShellAction{
-		command: command,
+		command: step.Run,
 		ctx:     ctx,
 		output:  output,
 	}

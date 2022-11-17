@@ -112,6 +112,7 @@ func (a *ShellAction) Hook() error {
 				// it spawned.
 				_ = syscall.Kill(-p.Pid, syscall.SIGKILL)
 				logger.Info("shell command killed")
+				return
 			}
 		}
 	}()

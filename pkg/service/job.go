@@ -41,13 +41,16 @@ type IJobService interface {
 	JobDetailList(name string, page, size int) *model.JobDetailPage
 
 	//DeleteJobDetail delete job detail
-	DeleteJobDetail(name string, id int) error
+	DeleteJobDetail(name string, pipelineDetailId int) error
 
 	//ExecuteJob  exec pipeline job
 	ExecuteJob(name string) error
 
-	// ReExecuteJob reExec pipeline job
-	ReExecuteJob(name string, pipelineId int) error
+	// ReExecuteJob re exec pipeline job
+	ReExecuteJob(name string, pipelineDetailId int) error
+
+	// StopJobDetail stop pipeline job
+	StopJobDetail(name string, pipelineDetailId int) error
 
 	// GetJobLog 获取job日志
 	GetJobLog(name string) *model.JobLog
@@ -80,14 +83,14 @@ func (svc *JobService) SaveJob(name string, job *model.Job) error {
 	src := filepath.Join(utils.DefaultConfigDir(), consts.JOB_DIR_NAME+"/"+name+"/"+name+".yml")
 	//determine whether the folder exists, and create it if it does not exist
 	_, err = os.Stat(dir)
-	if os.IsNotExist(err) {
-		err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil && os.IsNotExist(err) {
+		err := os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			log.Println("create jobs dir failed", err.Error())
 			return err
 		}
 	} else {
-		log.Println("the pipeline job name already exists", err.Error())
+		log.Println("the pipeline job name already exists")
 		return errors.New("the pipeline job name already exists")
 	}
 	//write data to yaml file
@@ -384,9 +387,9 @@ func (svc *JobService) JobDetailList(name string, page, pageSize int) *model.Job
 }
 
 // DeleteJobDetail delete job detail
-func (svc *JobService) DeleteJobDetail(name string, id int) error {
+func (svc *JobService) DeleteJobDetail(name string, pipelineDetailId int) error {
 	// job detail file path
-	src := filepath.Join(utils.DefaultConfigDir(), consts.JOB_DIR_NAME+"/"+name+"/"+consts.JOB_DETAIL_DIR_NAME+"/"+strconv.Itoa(id)+".yml")
+	src := filepath.Join(utils.DefaultConfigDir(), consts.JOB_DIR_NAME+"/"+name+"/"+consts.JOB_DETAIL_DIR_NAME+"/"+strconv.Itoa(pipelineDetailId)+".yml")
 	//judge whether the job detail file exists
 	_, err := os.Stat(src)
 	//not exist
@@ -439,16 +442,27 @@ func (svc *JobService) ExecuteJob(name string) error {
 	}
 
 	log.Println(jobDetail)
+	//todo 执行pipeline job
 	//create and save job detail
 	svc.SaveJobDetail(name, &jobDetail)
 	return nil
 }
 
-func (svc *JobService) ReExecuteJob(name string, pipelineId int) error {
+// ReExecuteJob re exec pipeline job
+func (svc *JobService) ReExecuteJob(name string, pipelineDetailId int) error {
 	//get job detail data
-	jobDetailData := svc.GetJobDetail(name, pipelineId)
+	jobDetailData := svc.GetJobDetail(name, pipelineDetailId)
 	println(jobDetailData)
 	//todo 重新执行pipeline job
+	return nil
+}
+
+// StopJobDetail stop pipeline job detail
+func (svc *JobService) StopJobDetail(name string, pipelineDetailId int) error {
+	//get job detail data
+	jobDetailData := svc.GetJobDetail(name, pipelineDetailId)
+	println(jobDetailData)
+	//todo stop pipeline job detail
 	return nil
 }
 

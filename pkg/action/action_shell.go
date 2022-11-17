@@ -116,6 +116,7 @@ func (a *ShellAction) Hook() (*model.ActionResult, error) {
 				// it spawned.
 				_ = syscall.Kill(-p.Pid, syscall.SIGKILL)
 				logger.Info("shell command killed")
+				return
 			}
 		}
 	}()

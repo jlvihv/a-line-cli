@@ -63,7 +63,7 @@ func Test_SaveJobDetail(t *testing.T) {
 	var stageDetails []model.StageDetail
 	stageDetails = append(stageDetails, stageDetail)
 	jobDetail := model.JobDetail{
-		Id: 2,
+		Id: 6,
 		Job: model.Job{
 			Version: "2",
 			Name:    "mysql",
@@ -78,7 +78,7 @@ func Test_SaveJobDetail(t *testing.T) {
 		Stages: stageDetails,
 	}
 	jobService := NewJobService()
-	jobService.SaveJobDetail("guo", &jobDetail)
+	jobService.SaveJobDetail("sun", &jobDetail)
 }
 
 func Test_GetJob(t *testing.T) {

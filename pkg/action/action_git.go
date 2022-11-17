@@ -77,6 +77,7 @@ func (a *GitAction) Hook() (*model.ActionResult, error) {
 			<-a.ctx.Done()
 			if a.ctx.Err() != nil {
 				logger.Errorf("git clone error: %v", a.ctx.Err())
+				return
 			} else {
 				p := c.Process
 				if p == nil {
@@ -87,6 +88,7 @@ func (a *GitAction) Hook() (*model.ActionResult, error) {
 				// it spawned.
 				_ = syscall.Kill(-p.Pid, syscall.SIGKILL)
 				logger.Info("git clone process killed")
+				return
 			}
 		}
 	}()

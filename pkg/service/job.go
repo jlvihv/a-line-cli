@@ -83,14 +83,14 @@ func (svc *JobService) SaveJob(name string, job *model.Job) error {
 	src := filepath.Join(utils.DefaultConfigDir(), consts.JOB_DIR_NAME+"/"+name+"/"+name+".yml")
 	//determine whether the folder exists, and create it if it does not exist
 	_, err = os.Stat(dir)
-	if os.IsNotExist(err) {
-		err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil && os.IsNotExist(err) {
+		err := os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			log.Println("create jobs dir failed", err.Error())
 			return err
 		}
 	} else {
-		log.Println("the pipeline job name already exists", err.Error())
+		log.Println("the pipeline job name already exists")
 		return errors.New("the pipeline job name already exists")
 	}
 	//write data to yaml file

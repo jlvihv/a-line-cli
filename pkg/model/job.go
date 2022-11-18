@@ -19,6 +19,7 @@ const (
 	STATUS_RUNNING Status = 1
 	STATUS_FAIL    Status = 2
 	STATUS_SUCCESS Status = 3
+	STATUS_STOP    Status = 4
 )
 
 type Job struct {
@@ -30,10 +31,11 @@ type Job struct {
 type JobDetail struct {
 	Id int
 	Job
-	Status    Status
-	Stages    []StageDetail
-	StartTime time.Time
-	Duration  time.Duration
+	Status      Status
+	TriggerMode string //触发方式
+	Stages      []StageDetail
+	StartTime   time.Time
+	Duration    time.Duration
 	ActionResult
 	Output *output.Output
 }

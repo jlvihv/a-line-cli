@@ -7,18 +7,18 @@ import (
 	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"github.com/hamster-shared/a-line-cli/pkg/service"
 	"gopkg.in/yaml.v3"
-	"log"
 	"strconv"
 )
 
 type HandlerServer struct {
 	jobService service.IJobService
-	dispatcher.IDispatcher
+	dispatch   dispatcher.IDispatcher
 }
 
-func NewHandlerServer(jobService service.IJobService) *HandlerServer {
+func NewHandlerServer(jobService service.IJobService, dispatch dispatcher.IDispatcher) *HandlerServer {
 	return &HandlerServer{
 		jobService: jobService,
+		dispatch:   dispatch,
 	}
 }
 
@@ -41,6 +41,7 @@ func (h *HandlerServer) createPipeline(gin *gin.Context) {
 		Fail(err.Error(), gin)
 		return
 	}
+
 	Success("", gin)
 }
 
@@ -106,7 +107,7 @@ func (h *HandlerServer) pipelineList(gin *gin.Context) {
 // getPipelineDetail get pipeline job detail info
 func (h *HandlerServer) getPipelineDetail(gin *gin.Context) {
 	name := gin.Param("name")
-	idStr := gin.Query("id")
+	idStr := gin.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		Fail(err.Error(), gin)
@@ -119,13 +120,13 @@ func (h *HandlerServer) getPipelineDetail(gin *gin.Context) {
 // deleteJobDetail delete job detail
 func (h *HandlerServer) deleteJobDetail(gin *gin.Context) {
 	name := gin.Param("name")
-	param := parameters.IdParameter{}
-	err := gin.BindJSON(&param)
+	idStr := gin.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return
 	}
-	err = h.jobService.DeleteJobDetail(name, param.Id)
+	err = h.jobService.DeleteJobDetail(name, id)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return
@@ -136,8 +137,8 @@ func (h *HandlerServer) deleteJobDetail(gin *gin.Context) {
 // getPipelineDetailList get pipeline job detail list
 func (h *HandlerServer) getPipelineDetailList(gin *gin.Context) {
 	name := gin.Param("name")
-	pageStr := gin.Query("page")
-	sizeStr := gin.Query("size")
+	pageStr := gin.DefaultQuery("page", "1")
+	sizeStr := gin.DefaultQuery("size", "10")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		Fail(err.Error(), gin)
@@ -155,7 +156,14 @@ func (h *HandlerServer) getPipelineDetailList(gin *gin.Context) {
 // execPipeline exec pipeline job
 func (h *HandlerServer) execPipeline(gin *gin.Context) {
 	name := gin.Param("name")
-	err := h.jobService.ExecuteJob(name)
+	job := h.jobService.GetJob(name)
+	jobDetail, err := h.jobService.ExecuteJob(name)
+	if err != nil {
+		Fail(err.Error(), gin)
+		return
+	}
+	node := h.dispatch.DispatchNode(job)
+	h.dispatch.SendJob(jobDetail, node)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return
@@ -166,14 +174,13 @@ func (h *HandlerServer) execPipeline(gin *gin.Context) {
 // reExecuteJob re exec pipeline job detail
 func (h *HandlerServer) reExecuteJob(gin *gin.Context) {
 	name := gin.Param("name")
-	log.Println(name)
-	execData := parameters.IdParameter{}
-	err := gin.BindJSON(&execData)
+	idStr := gin.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return
 	}
-	err = h.jobService.ReExecuteJob(name, execData.Id)
+	err = h.jobService.ReExecuteJob(name, id)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return
@@ -184,13 +191,13 @@ func (h *HandlerServer) reExecuteJob(gin *gin.Context) {
 // stopJobDetail stop pipeline job
 func (h *HandlerServer) stopJobDetail(gin *gin.Context) {
 	name := gin.Param("name")
-	execData := parameters.IdParameter{}
-	err := gin.BindJSON(&execData)
+	idStr := gin.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return
 	}
-	err = h.jobService.StopJobDetail(name, execData.Id)
+	err = h.jobService.StopJobDetail(name, id)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return

@@ -59,7 +59,7 @@ type IJobService interface {
 	// GetJobLog 获取 job 日志
 	GetJobLog(name string, pipelineDetailId int) *model.JobLog
 	// GetJobStageLog 获取 job 的 stage 日志
-	GetJobStageLog(name string, pipelineDetailId int, stageName string) map[string]*model.JobStageLog
+	GetJobStageLog(name string, pipelineDetailId int, stageName string) *model.JobStageLog
 }
 
 type JobService struct {

@@ -8,6 +8,8 @@ import (
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/hamster-shared/a-line-cli/pkg/output"
 )
 
 type Status int
@@ -23,6 +25,7 @@ type Job struct {
 	Version string           `yaml:"version"`
 	Name    string           `yaml:"name"`
 	Stages  map[string]Stage `yaml:"stages"`
+	Output  *output.Output
 }
 
 type JobDetail struct {

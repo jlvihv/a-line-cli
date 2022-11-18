@@ -13,15 +13,28 @@ import (
 )
 
 type Output struct {
-	Name         string
-	ID           int
-	buffer       []string
-	f            *os.File
-	mu           sync.Mutex
-	filename     string
-	done         bool
-	fileCursor   int
-	bufferCursor int
+	Name               string
+	ID                 int
+	buffer             []string
+	f                  *os.File
+	mu                 sync.Mutex
+	filename           string
+	fileCursor         int
+	bufferCursor       int
+	stageTimeConsuming map[string]TimeConsuming
+	timeConsuming      TimeConsuming
+}
+
+type StageOutput struct {
+	Name    string
+	Content string
+}
+
+type TimeConsuming struct {
+	Done      bool
+	StartTime time.Time
+	EndTime   time.Time
+	Duration  time.Duration
 }
 
 // New 新建一个 Output 对象，会自动初始化文件，以及定时将内容写入文件
@@ -30,6 +43,10 @@ func New(name string, id int) *Output {
 		Name:   name,
 		ID:     id,
 		buffer: make([]string, 0, 16),
+		timeConsuming: TimeConsuming{
+			StartTime: time.Now().Local(),
+		},
+		stageTimeConsuming: make(map[string]TimeConsuming),
 	}
 
 	err := o.initFile()
@@ -40,18 +57,69 @@ func New(name string, id int) *Output {
 
 	o.timedWriteFile()
 
-	o.WriteLine("[Job] Started on " + time.Now().Local().Format("2006-01-02 15:04:05"))
+	o.WriteLine("[Job] Started on " + o.timeConsuming.StartTime.Format("2006-01-02 15:04:05"))
 
 	return o
 }
 
+// Duration 返回持续时间
+func (o *Output) Duration() time.Duration {
+	if o.timeConsuming.Done {
+		return o.timeConsuming.Duration
+	}
+	return time.Since(o.timeConsuming.StartTime)
+}
+
+// TimeConsuming 返回耗时信息
+func (o *Output) TimeConsuming() TimeConsuming {
+	return o.timeConsuming
+}
+
+// StageDuration 返回某个 Stage 的持续时间
+func (o *Output) StageDuration(name string) time.Duration {
+	stageTimeConsuming, ok := o.stageTimeConsuming[name]
+	if !ok {
+		return 0
+	}
+	if stageTimeConsuming.Done {
+		return stageTimeConsuming.Duration
+	}
+	if stageTimeConsuming.StartTime.IsZero() {
+		return 0
+	}
+	return time.Since(stageTimeConsuming.StartTime)
+}
+
+// StageTimeConsuming 将阶段的时间信息暴露出去，便于外部查看详情
+func (o *Output) StageTimeConsuming(name string) (TimeConsuming, error) {
+	timeConsuming, ok := o.stageTimeConsuming[name]
+	if !ok {
+		return TimeConsuming{}, fmt.Errorf("stage %s not found", name)
+	}
+	return timeConsuming, nil
+}
+
 // Done 标记输出已完成，会将缓存中的内容刷入文件，然后关闭文件
 func (o *Output) Done() {
-	o.mu.Lock()
-	o.done = true
 	logger.Trace("output done, flush all, close file")
+	now := time.Now().Local()
+
+	// 将之前的 Stage 标记为完成
+	for k, v := range o.stageTimeConsuming {
+		if !v.Done {
+			v.EndTime = now
+			v.Duration = v.EndTime.Sub(v.StartTime)
+			v.Done = true
+			o.stageTimeConsuming[k] = v
+		}
+	}
+
+	o.mu.Lock()
+	o.timeConsuming.Done = true
+	o.timeConsuming.EndTime = now
+	o.timeConsuming.Duration = now.Sub(o.timeConsuming.StartTime)
 	o.flush(o.buffer[o.fileCursor:])
-	o.flush([]string{"\n\n\n[Job] Finished on " + time.Now().Local().Format("2006-01-02 15:04:05")})
+	o.flush([]string{"\n\n\n[Job] Finished on " + now.Format("2006-01-02 15:04:05")})
 	o.f.Close()
 	o.mu.Unlock()
 }
@@ -89,10 +157,24 @@ func (o *Output) NewContent() string {
 
 // NewStage 会写入以 [Pipeline] Stage: 开头的一行，表示一个新的 Stage 开始
 func (o *Output) NewStage(name string) {
+
+	// 将之前的 Stage 标记为完成
+	for k, v := range o.stageTimeConsuming {
+		if !v.Done {
+			v.EndTime = time.Now().Local()
+			v.Duration = v.EndTime.Sub(v.StartTime)
+			v.Done = true
+			o.stageTimeConsuming[k] = v
+		}
+	}
+
 	o.WriteLine("\n")
 	o.WriteLine("\n")
 	o.WriteLine("\n")
 	o.WriteLine("[Pipeline] Stage: " + name)
+	o.stageTimeConsuming[name] = TimeConsuming{
+		StartTime: time.Now().Local(),
+	}
 }
 
 // 在一个协程中定时刷入文件
@@ -101,7 +183,7 @@ func (o *Output) timedWriteFile() {
 	go func(endIndex int) {
 		for {
 			o.mu.Lock()
-			if o.done {
+			if o.timeConsuming.Done {
 				o.mu.Unlock()
 				break
 			}
@@ -163,15 +245,7 @@ func (o *Output) initFile() error {
 
 // Filename 返回文件名
 func (o *Output) Filename() string {
-	if o.f == nil {
-		return ""
-	}
-	return o.f.Name()
-}
-
-type StageOutput struct {
-	Name    string
-	Content string
+	return o.filename
 }
 
 // StageOutputList 返回存储了 Stage 输出的列表

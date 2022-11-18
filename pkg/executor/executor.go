@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,7 +33,7 @@ type IExecutor interface {
 	//SendResultToQueue 发送结果到队列
 	SendResultToQueue(channel chan any)
 
-	Cancel(name string)
+	Cancel(id int, job *model.Job) error
 }
 
 type Executor struct {
@@ -79,7 +80,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), "stack", engineContext))
 
 	// 将取消 hook 记录到内存中，用于中断程序
-	e.cancelMap[job.Name] = cancel
+	e.cancelMap[strings.Join([]string{job.Name, strconv.Itoa(id)}, "/")] = cancel
 
 	// 队列堆栈
 	var stack utils.Stack[action2.ActionHandler]
@@ -188,10 +189,11 @@ func (e *Executor) SendResultToQueue(channel chan any) {
 }
 
 // Cancel 取消
-func (e *Executor) Cancel(name string) {
+func (e *Executor) Cancel(id int, job *model.Job) error {
 
-	cancel, ok := e.cancelMap[name]
+	cancel, ok := e.cancelMap[strings.Join([]string{job.Name, strconv.Itoa(id)}, "/")]
 	if ok {
 		cancel()
 	}
+	return nil
 }

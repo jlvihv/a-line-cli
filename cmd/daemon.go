@@ -25,7 +25,6 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("daemon called")
-		channel := make(chan model.QueueMessage)
 		dispatch := dispatcher.NewDispatcher(channel)
 		// 本地注册
 		dispatch.Register(&model.Node{

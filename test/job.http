@@ -49,3 +49,6 @@ Content-Type: application/json
 
 ### cancel job
 POST http://localhost:8080/pipeline/test3/7/stop
+
+###
+GET http://localhost:8080/pipeline/test3/logs/9

@@ -83,3 +83,9 @@ func (d *Dispatcher) CancelJob(job *model.Job, node *model.Node) {
 	d.Channel <- model.NewStopQueueMsg(job.Name, 1)
 	return
 }
+
+// GetExecutor 根据节点获取执行器
+// TODO ... 这个方法设计的不好，分布式机构后应当用api代替
+func (d *Dispatcher) GetExecutor(node *model.Node) executor.IExecutor {
+	return nil
+}

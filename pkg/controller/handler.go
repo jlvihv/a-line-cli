@@ -13,12 +13,13 @@ import (
 
 type HandlerServer struct {
 	jobService service.IJobService
-	dispatcher.IDispatcher
+	dispatch   dispatcher.IDispatcher
 }
 
-func NewHandlerServer(jobService service.IJobService) *HandlerServer {
+func NewHandlerServer(jobService service.IJobService, dispatch dispatcher.IDispatcher) *HandlerServer {
 	return &HandlerServer{
 		jobService: jobService,
+		dispatch:   dispatch,
 	}
 }
 
@@ -41,6 +42,7 @@ func (h *HandlerServer) createPipeline(gin *gin.Context) {
 		Fail(err.Error(), gin)
 		return
 	}
+
 	Success("", gin)
 }
 
@@ -155,7 +157,10 @@ func (h *HandlerServer) getPipelineDetailList(gin *gin.Context) {
 // execPipeline exec pipeline job
 func (h *HandlerServer) execPipeline(gin *gin.Context) {
 	name := gin.Param("name")
+	job := h.jobService.GetJob(name)
 	err := h.jobService.ExecuteJob(name)
+	node := h.dispatch.DispatchNode(job)
+	h.dispatch.SendJob(job, node)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return

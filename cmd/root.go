@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/hamster-shared/a-line-cli/pkg/controller"
+	"github.com/hamster-shared/a-line-cli/pkg/dispatcher"
 	"github.com/hamster-shared/a-line-cli/pkg/executor"
 	"github.com/hamster-shared/a-line-cli/pkg/logger"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
@@ -19,9 +20,11 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var (
+	channel       = make(chan model.QueueMessage)
+	dispatch      = dispatcher.NewDispatcher(channel)
 	pipelineFile  string
 	jobService    = service.NewJobService()
-	handlerServer = controller.NewHandlerServer(jobService)
+	handlerServer = controller.NewHandlerServer(jobService, dispatch)
 	rootCmd       = &cobra.Command{
 		Use:   "a-line-cli",
 		Short: "A brief description of your application",
@@ -41,7 +44,6 @@ to quickly create a Cobra application.`,
 				return
 			}
 
-			channel := make(chan model.QueueMessage)
 			// 启动executor
 
 			executeClient := executor.NewExecutorClient(channel, jobService)

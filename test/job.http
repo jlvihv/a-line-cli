@@ -1,0 +1,9 @@
+## create job
+
+POST http://localhost:8080/pipeline
+Content-Type: application/json
+
+{
+  "name": "test2",
+  "yaml": "version: \"1.0\"\nname: some-test2\nstages:\n  git-clone:\n    steps:\n      - name: git-clone\n        uses: git-checkout\n        with:\n          url: https://gitee.com/mohaijiang/spring-boot-example.git\n          branch: master"
+}

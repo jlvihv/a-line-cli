@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hamster-shared/a-line-cli/pkg/controller/parameters"
+	"github.com/hamster-shared/a-line-cli/pkg/dispatcher"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"github.com/hamster-shared/a-line-cli/pkg/service"
 	"gopkg.in/yaml.v3"
@@ -12,6 +13,7 @@ import (
 
 type HandlerServer struct {
 	jobService service.IJobService
+	dispatcher.IDispatcher
 }
 
 func NewHandlerServer(jobService service.IJobService) *HandlerServer {

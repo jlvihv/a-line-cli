@@ -24,11 +24,10 @@ type GitAction struct {
 	ctx        context.Context
 }
 
-func NewGitAction(repository, branch string, ctx context.Context, output *output.Output) *GitAction {
-
+func NewGitAction(step model.Step, ctx context.Context, output *output.Output) *GitAction {
 	return &GitAction{
-		repository: repository,
-		branch:     branch,
+		repository: step.With["url"],
+		branch:     step.With["branch"],
 		ctx:        ctx,
 		output:     output,
 	}

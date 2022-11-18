@@ -442,7 +442,8 @@ func (svc *JobService) ExecuteJob(name string) error {
 	}
 
 	log.Println(jobDetail)
-	//todo 执行pipeline job
+	//TODO... 执行pipeline job
+
 	//create and save job detail
 	svc.SaveJobDetail(name, &jobDetail)
 	return nil

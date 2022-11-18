@@ -19,6 +19,7 @@ const (
 	STATUS_RUNNING Status = 1
 	STATUS_FAIL    Status = 2
 	STATUS_SUCCESS Status = 3
+	STATUS_STOP    Status = 4
 )
 
 type Job struct {

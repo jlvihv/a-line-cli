@@ -53,9 +53,9 @@ type IJobService interface {
 	StopJobDetail(name string, pipelineDetailId int) error
 
 	// GetJobLog 获取job日志
-	GetJobLog(name string) *model.JobLog
+	GetJobLog(name string, pipelineDetailId int) *model.JobLog
 	// GetJobStageLog 获取job的stage 日志
-	GetJobStageLog(name string) map[string]*model.JobStageLog
+	GetJobStageLog(name string, pipelineDetailId int, stageName string) map[string]*model.JobStageLog
 }
 
 type JobService struct {
@@ -72,6 +72,9 @@ func NewJobService() *JobService {
 
 // SaveJob save pipeline job
 func (svc *JobService) SaveJob(name string, job *model.Job) error {
+	if name != job.Name {
+		job.Name = name
+	}
 	// serializes yaml struct
 	data, err := yaml.Marshal(job)
 	if err != nil {
@@ -148,6 +151,9 @@ func (svc *JobService) UpdateJob(oldName string, newName string, job *model.Job)
 		log.Println("update job failed,job file not exist", err.Error())
 		return err
 	}
+	if oldName != job.Name {
+		job.Name = oldName
+	}
 	if newName != "" {
 		newDir := filepath.Join(utils.DefaultConfigDir(), consts.JOB_DIR_NAME+"/"+newName)
 		err = os.Rename(oldDir, newDir)
@@ -163,6 +169,9 @@ func (svc *JobService) UpdateJob(oldName string, newName string, job *model.Job)
 			return err
 		}
 		src = newSrc
+		if newName != job.Name {
+			job.Name = newName
+		}
 	}
 	// serializes yaml struct
 	data, err := yaml.Marshal(job)
@@ -442,7 +451,8 @@ func (svc *JobService) ExecuteJob(name string) error {
 	}
 
 	log.Println(jobDetail)
-	//todo 执行pipeline job
+	//TODO... 执行pipeline job
+
 	//create and save job detail
 	svc.SaveJobDetail(name, &jobDetail)
 	return nil
@@ -467,14 +477,14 @@ func (svc *JobService) StopJobDetail(name string, pipelineDetailId int) error {
 }
 
 // GetJobLog 获取job日志
-func (svc *JobService) GetJobLog(name string) *model.JobLog {
+func (svc *JobService) GetJobLog(name string, pipelineDetailId int) *model.JobLog {
 
 	//TODO ... 实现获取日志
 	return nil
 }
 
 // GetJobStageLog 获取job的stage 日志
-func (svc *JobService) GetJobStageLog(name string) map[string]*model.JobStageLog {
+func (svc *JobService) GetJobStageLog(name string, pipelineDetailId int, stageName string) map[string]*model.JobStageLog {
 
 	//TODO... 实现获取阶段日志
 	return nil

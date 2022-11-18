@@ -21,10 +21,10 @@ type DockerEnv struct {
 	output      *output.Output
 }
 
-func NewDockerEnv(image string, ctx context.Context, output *output.Output) *DockerEnv {
+func NewDockerEnv(step model.Step, ctx context.Context, output *output.Output) *DockerEnv {
 	return &DockerEnv{
 		ctx:    ctx,
-		Image:  image,
+		Image:  step.RunsOn,
 		output: output,
 	}
 }

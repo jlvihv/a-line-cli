@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hamster-shared/a-line-cli/pkg/controller/parameters"
+	"github.com/hamster-shared/a-line-cli/pkg/dispatcher"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"github.com/hamster-shared/a-line-cli/pkg/service"
 	"gopkg.in/yaml.v3"
@@ -12,6 +13,7 @@ import (
 
 type HandlerServer struct {
 	jobService service.IJobService
+	dispatcher.IDispatcher
 }
 
 func NewHandlerServer(jobService service.IJobService) *HandlerServer {
@@ -194,4 +196,31 @@ func (h *HandlerServer) stopJobDetail(gin *gin.Context) {
 		return
 	}
 	Success("", gin)
+}
+
+// getJobLog get pipeline job detail logs
+func (h *HandlerServer) getJobLog(gin *gin.Context) {
+	name := gin.Param("name")
+	idStr := gin.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		Fail(err.Error(), gin)
+		return
+	}
+	data := h.jobService.GetJobLog(name, id)
+	Success(data, gin)
+}
+
+// getJobStageLog get job detail stage logs
+func (h *HandlerServer) getJobStageLog(gin *gin.Context) {
+	name := gin.Param("name")
+	idStr := gin.Param("id")
+	stageName := gin.Param("stagename")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		Fail(err.Error(), gin)
+		return
+	}
+	data := h.jobService.GetJobStageLog(name, id, stageName)
+	Success(data, gin)
 }

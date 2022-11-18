@@ -25,7 +25,6 @@ type Job struct {
 	Version string           `yaml:"version"`
 	Name    string           `yaml:"name"`
 	Stages  map[string]Stage `yaml:"stages"`
-	Output  *output.Output
 }
 
 type JobDetail struct {
@@ -36,6 +35,7 @@ type JobDetail struct {
 	StartTime time.Time
 	Duration  time.Duration
 	ActionResult
+	Output *output.Output
 }
 
 func (jd *JobDetail) ToString() string {

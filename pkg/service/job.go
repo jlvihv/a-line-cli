@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type IJobService interface {
@@ -452,7 +453,14 @@ func (svc *JobService) ExecuteJob(name string) (*model.JobDetail, error) {
 		sort.Sort(sort.Reverse(sort.IntSlice(ids)))
 		jobDetail.Id = ids[0] + 1
 	}
-
+	stageDetail, err := jobData.StageSort()
+	if err != nil {
+		return &jobDetail, err
+	}
+	jobDetail.Job = *jobData
+	jobDetail.Status = model.STATUS_NOTRUN
+	jobDetail.StartTime = time.Now()
+	jobDetail.Stages = stageDetail
 	log.Println(jobDetail)
 	//TODO... 执行pipeline job
 

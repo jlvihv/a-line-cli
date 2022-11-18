@@ -106,7 +106,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		return nil
 	}
 
-	job.Output = output.New(job.Name, jobWrapper.Id)
+	jobWrapper.Output = output.New(job.Name, jobWrapper.Id)
 
 	for index, stageWapper := range jobWrapper.Stages {
 		//TODO ... stage 的输出也需要换成堆栈方式
@@ -119,15 +119,15 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		for _, step := range stageWapper.Stage.Steps {
 			var ah action2.ActionHandler
 			if step.RunsOn != "" {
-				ah = action2.NewDockerEnv(step, ctx, job.Output)
+				ah = action2.NewDockerEnv(step, ctx, jobWrapper.Output)
 				err = executeAction(ah, jobWrapper)
 			}
 			if step.Uses == "" {
-				ah = action2.NewShellAction(step, ctx, job.Output)
+				ah = action2.NewShellAction(step, ctx, jobWrapper.Output)
 				err = executeAction(ah, jobWrapper)
 			}
 			if step.Uses == "git-checkout" {
-				ah = action2.NewGitAction(step, ctx, job.Output)
+				ah = action2.NewGitAction(step, ctx, jobWrapper.Output)
 				err = executeAction(ah, jobWrapper)
 			}
 			if strings.Contains(step.Uses, "/") {
@@ -156,7 +156,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 		}
 
 	}
-	job.Output.Done()
+	jobWrapper.Output.Done()
 
 	delete(e.cancelMap, job.Name)
 	if err == nil {

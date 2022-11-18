@@ -44,7 +44,7 @@ type IJobService interface {
 	DeleteJobDetail(name string, pipelineDetailId int) error
 
 	//ExecuteJob  exec pipeline job
-	ExecuteJob(name string) error
+	ExecuteJob(name string) (*model.JobDetail, error)
 
 	// ReExecuteJob re exec pipeline job
 	ReExecuteJob(name string, pipelineDetailId int) error
@@ -415,7 +415,7 @@ func (svc *JobService) DeleteJobDetail(name string, pipelineDetailId int) error 
 }
 
 // ExecuteJob exec pipeline job
-func (svc *JobService) ExecuteJob(name string) error {
+func (svc *JobService) ExecuteJob(name string) (*model.JobDetail, error) {
 	//get job data
 	jobData := svc.GetJob(name)
 	log.Println(jobData)
@@ -428,13 +428,16 @@ func (svc *JobService) ExecuteJob(name string) error {
 	_, err := os.Stat(src)
 	if os.IsNotExist(err) {
 		log.Println("job detail file not exist", err.Error())
-		return err
+		err = os.MkdirAll(src, os.ModePerm)
+		if err != nil {
+			return nil, err
+		}
 	}
 	// read file
 	files, err := os.ReadDir(src)
 	if err != nil {
 		log.Println("read file failed", err.Error())
-		return err
+		return nil, err
 	}
 	for _, file := range files {
 		index := strings.Index(file.Name(), ".")
@@ -454,8 +457,7 @@ func (svc *JobService) ExecuteJob(name string) error {
 	//TODO... 执行pipeline job
 
 	//create and save job detail
-	svc.SaveJobDetail(name, &jobDetail)
-	return nil
+	return &jobDetail, svc.SaveJobDetail(name, &jobDetail)
 }
 
 // ReExecuteJob re exec pipeline job

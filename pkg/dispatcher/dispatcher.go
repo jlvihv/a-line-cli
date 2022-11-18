@@ -17,7 +17,7 @@ type IDispatcher interface {
 	HealthcheckNode(node *model.Node)
 
 	// SendJob 发送任务
-	SendJob(job *model.Job, node *model.Node)
+	SendJob(job *model.JobDetail, node *model.Node)
 
 	// CancelJob 取消任务
 	CancelJob(job *model.Job, node *model.Node)
@@ -67,12 +67,12 @@ func (d *Dispatcher) HealthcheckNode(*model.Node) {
 }
 
 // SendJob 发送任务
-func (d *Dispatcher) SendJob(job *model.Job, node *model.Node) {
+func (d *Dispatcher) SendJob(job *model.JobDetail, node *model.Node) {
 
 	// TODO ... 单机情况下 不考虑节点，直接发送本地
 	// TODO ... 集群情况下 通过注册的ip 地址进行api接口调用
 
-	d.Channel <- model.NewStartQueueMsg(job.Name, 1)
+	d.Channel <- model.NewStartQueueMsg(job.Name, job.Id)
 
 	return
 }

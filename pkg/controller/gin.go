@@ -31,7 +31,7 @@ func (h *HttpServer) StartHttpServer() {
 	//delete pipeline job detail
 	r.DELETE("/pipeline/:name/detail", h.handlerServer.deleteJobDetail)
 	//get pipeline job detail list
-	r.GET("/pipeline/:name/detail/list", h.handlerServer.getPipelineDetailList)
+	r.GET("/pipeline/:name/details", h.handlerServer.getPipelineDetailList)
 	//exec pipeline job
 	r.POST("/pipeline/exec/:name", h.handlerServer.execPipeline)
 	//re exec pipeline detail job

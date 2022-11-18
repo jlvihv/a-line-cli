@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -168,6 +170,7 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 
 	//TODO ... 发送结果到队列
 	e.SendResultToQueue(nil)
+	_ = os.RemoveAll(path.Join(engineContext["hamsterRoot"].(string), job.Name))
 
 	return err
 

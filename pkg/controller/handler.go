@@ -158,9 +158,13 @@ func (h *HandlerServer) getPipelineDetailList(gin *gin.Context) {
 func (h *HandlerServer) execPipeline(gin *gin.Context) {
 	name := gin.Param("name")
 	job := h.jobService.GetJob(name)
-	err := h.jobService.ExecuteJob(name)
+	jobDetail, err := h.jobService.ExecuteJob(name)
+	if err != nil {
+		Fail(err.Error(), gin)
+		return
+	}
 	node := h.dispatch.DispatchNode(job)
-	h.dispatch.SendJob(job, node)
+	h.dispatch.SendJob(jobDetail, node)
 	if err != nil {
 		Fail(err.Error(), gin)
 		return

@@ -31,10 +31,11 @@ type Job struct {
 type JobDetail struct {
 	Id int
 	Job
-	Status    Status
-	Stages    []StageDetail
-	StartTime time.Time
-	Duration  time.Duration
+	Status      Status
+	TriggerMode string //触发方式
+	Stages      []StageDetail
+	StartTime   time.Time
+	Duration    time.Duration
 	ActionResult
 }
 

@@ -36,4 +36,6 @@ jobs:
           name: a-line-cli-v1.0.0-linux-amd64.zip
           path: a-line-cli
 
-
+      - run : |
+          docker build -t hamstershare/a-line-cli:latest .
+          docker push hamstershare/a-line-cli:latest

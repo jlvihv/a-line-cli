@@ -6,16 +6,16 @@ import (
 )
 
 type Stage struct {
-	Steps []Step   `yaml:"steps"`
-	Needs []string `yaml:"needs"`
+	Steps []Step   `yaml:"steps" json:"steps"`
+	Needs []string `yaml:"needs" json:"needs"`
 }
 
 type StageDetail struct {
-	Name      string
-	Stage     Stage
-	Status    Status
-	StartTime time.Time
-	Duration  time.Duration
+	Name      string        `json:"name"`
+	Stage     Stage         `json:"stage"`
+	Status    Status        `json:"status"`
+	StartTime time.Time     `json:"startTime"`
+	Duration  time.Duration `json:"duration"`
 }
 
 func NewStageDetail(name string, stage Stage) StageDetail {

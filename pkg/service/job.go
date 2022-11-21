@@ -14,6 +14,7 @@ import (
 	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"github.com/hamster-shared/a-line-cli/pkg/output"
 	"github.com/hamster-shared/a-line-cli/pkg/utils"
+	"github.com/jinzhu/copier"
 	"gopkg.in/yaml.v3"
 	"time"
 )
@@ -208,6 +209,7 @@ func (svc *JobService) DeleteJob(name string) error {
 
 // SaveJobDetail  save job detail
 func (svc *JobService) SaveJobDetail(name string, job *model.JobDetail) error {
+	job.TriggerMode = consts.TRIGGER_MODE
 	// serializes yaml struct
 	data, err := yaml.Marshal(job)
 	if err != nil {
@@ -291,7 +293,7 @@ func (svc *JobService) GetJobDetail(name string, id int) *model.JobDetail {
 // JobList  job list
 func (svc *JobService) JobList(keyword string, page, pageSize int) *model.JobPage {
 	var jobPage model.JobPage
-	var jobs []model.Job
+	var jobs []model.JobVo
 	//jobs folder path
 	src := filepath.Join(utils.DefaultConfigDir(), consts.JOB_DIR_NAME)
 	_, err := os.Stat(src)
@@ -329,13 +331,16 @@ func (svc *JobService) JobList(keyword string, page, pageSize int) *model.JobPag
 			continue
 		}
 		var jobData model.Job
+		var jobVo model.JobVo
 		//deserialization job yml file
 		err = yaml.Unmarshal(fileContent, &jobData)
 		if err != nil {
 			log.Println("get job,deserialization job file failed", err.Error())
 			continue
 		}
-		jobs = append(jobs, jobData)
+		copier.Copy(&jobVo, &jobData)
+		svc.getJobInfo(&jobVo)
+		jobs = append(jobs, jobVo)
 	}
 	pageNum, size, start, end := utils.SlicePage(page, pageSize, len(jobs))
 	jobPage.Page = pageNum
@@ -459,16 +464,12 @@ func (svc *JobService) ExecuteJob(name string) (*model.JobDetail, error) {
 	jobDetail.Status = model.STATUS_NOTRUN
 	jobDetail.StartTime = time.Now()
 	jobDetail.Stages = stageDetail
-	err = svc.SaveJobDetail(name, &jobDetail)
-	if err != nil {
-		return &jobDetail, err
-	}
-	jobData.Status = model.STATUS_RUNNING
+	jobDetail.TriggerMode = consts.TRIGGER_MODE
 	log.Println(jobDetail)
 	//TODO... 执行 pipeline job
 
 	//create and save job detail
-	return &jobDetail, svc.UpdateJob(jobData.Name, "", jobData)
+	return &jobDetail, svc.SaveJobDetail(name, &jobDetail)
 }
 
 // ReExecuteJob re exec pipeline job
@@ -529,4 +530,36 @@ func (svc *JobService) GetJobStageLog(name string, pipelineDetailId int, stageNa
 		}
 	}
 	return nil
+}
+
+func (svc *JobService) getJobInfo(jobData *model.JobVo) {
+	//get the folder path of job details
+	src := filepath.Join(utils.DefaultConfigDir(), consts.JOB_DIR_NAME, jobData.Name, consts.JOB_DETAIL_DIR_NAME)
+	_, err := os.Stat(src)
+	if os.IsNotExist(err) {
+		log.Println("job-details folder does not exist", err.Error())
+	}
+	files, err := os.ReadDir(src)
+	if err != nil {
+		log.Println("failed to read jobs folder", err.Error())
+	}
+	var ids []int
+	for _, file := range files {
+		index := strings.Index(file.Name(), ".")
+		id, err := strconv.Atoi(file.Name()[0:index])
+		if err != nil {
+			log.Println("string to int failed", err.Error())
+			continue
+		}
+		ids = append(ids, id)
+	}
+	if len(ids) > 0 {
+		sort.Sort(sort.Reverse(sort.IntSlice(ids)))
+		jobDetail := svc.GetJobDetail(jobData.Name, ids[0])
+		jobData.Duration = jobDetail.Duration
+		jobData.Status = jobDetail.Status
+		jobData.TriggerMode = jobDetail.TriggerMode
+		jobData.StartTime = jobDetail.StartTime
+		jobData.TriggerMode = jobDetail.TriggerMode
+	}
 }

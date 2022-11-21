@@ -23,22 +23,31 @@ const (
 )
 
 type Job struct {
-	Version string           `yaml:"version"`
-	Name    string           `yaml:"name"`
-	Stages  map[string]Stage `yaml:"stages"`
-	Status  Status
+	Version string           `yaml:"version" json:"version"`
+	Name    string           `yaml:"name" json:"name"`
+	Stages  map[string]Stage `yaml:"stages" json:"stages"`
+}
+
+type JobVo struct {
+	Version     string           `yaml:"version" json:"version"`
+	Name        string           `yaml:"name" json:"name"`
+	Stages      map[string]Stage `yaml:"stages" json:"stages"`
+	Status      Status           `json:"status"`
+	StartTime   time.Time        `yaml:"startTime"json:"startTime"`
+	Duration    time.Duration    `json:"duration"`
+	TriggerMode string           `yaml:"triggerMode"json:"triggerMode"`
 }
 
 type JobDetail struct {
-	Id int
+	Id int `json:"id"`
 	Job
-	Status      Status
-	TriggerMode string //触发方式
-	Stages      []StageDetail
-	StartTime   time.Time
-	Duration    time.Duration
-	ActionResult
-	Output *output.Output
+	Status       Status        `json:"status"`
+	TriggerMode  string        `yaml:"triggerMode"json:"triggerMode"`
+	Stages       []StageDetail `json:"stages"`
+	StartTime    time.Time     `yaml:"startTime"json:"startTime"`
+	Duration     time.Duration `json:"duration"`
+	ActionResult `yaml:"actionResult" json:"actionResult"`
+	Output       *output.Output `json:"output"`
 }
 
 func (jd *JobDetail) ToString() string {
@@ -116,40 +125,40 @@ func (jd *JobDetail) AddArtifactory(file *os.File) error {
 
 type JobLog struct {
 	// 开始时间
-	StartTime time.Time
+	StartTime time.Time `json:"startTime"`
 	// 持续时间
-	Duration time.Duration
+	Duration time.Duration `json:"duration"`
 
 	//日志内容
-	Content string
+	Content string `json:"content"`
 
 	//最后一行 行号
-	LastLine int
+	LastLine int `json:"lastLine"`
 }
 
 type JobStageLog struct {
 	// 开始时间
-	StartTime time.Time
+	StartTime time.Time `json:"startTime"`
 	// 持续时间
-	Duration time.Duration
+	Duration time.Duration `json:"duration"`
 
 	//日志内容
-	Content string
+	Content string `json:"content"`
 
 	//最后一行 行号
-	LastLine int
+	LastLine int `json:"lastLine"`
 }
 
 type JobPage struct {
-	Data     []Job
-	Total    int
-	Page     int
-	PageSize int
+	Data     []JobVo `json:"data"`
+	Total    int     `json:"total"`
+	Page     int     `json:"page"`
+	PageSize int     `json:"pageSize"`
 }
 
 type JobDetailPage struct {
-	Data     []JobDetail
-	Total    int
-	Page     int
-	PageSize int
+	Data     []JobDetail `json:"data"`
+	Total    int         `json:"total"`
+	Page     int         `json:"page"`
+	PageSize int         `json:"pageSize"`
 }

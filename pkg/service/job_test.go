@@ -36,7 +36,7 @@ func Test_SaveJob(t *testing.T) {
 		},
 	}
 	jobService := NewJobService()
-	jobService.SaveJob("guo", &job)
+	jobService.SaveJob("qiao", &job)
 }
 
 func Test_SaveJobDetail(t *testing.T) {

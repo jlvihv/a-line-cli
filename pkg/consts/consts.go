@@ -6,3 +6,7 @@ const (
 	JOB_DETAIL_DIR_NAME     = "job-details"
 	JOB_DETAIL_LOG_DIR_NAME = "job-details-log"
 )
+
+const (
+	TRIGGER_MODE = "Manual trigger"
+)

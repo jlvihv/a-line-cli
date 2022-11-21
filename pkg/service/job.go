@@ -561,5 +561,6 @@ func (svc *JobService) getJobInfo(jobData *model.JobVo) {
 		jobData.TriggerMode = jobDetail.TriggerMode
 		jobData.StartTime = jobDetail.StartTime
 		jobData.TriggerMode = jobDetail.TriggerMode
+		jobData.PipelineDetailId = jobDetail.Id
 	}
 }

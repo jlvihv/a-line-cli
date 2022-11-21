@@ -29,13 +29,14 @@ type Job struct {
 }
 
 type JobVo struct {
-	Version     string           `yaml:"version" json:"version"`
-	Name        string           `yaml:"name" json:"name"`
-	Stages      map[string]Stage `yaml:"stages" json:"stages"`
-	Status      Status           `json:"status"`
-	StartTime   time.Time        `yaml:"startTime"json:"startTime"`
-	Duration    time.Duration    `json:"duration"`
-	TriggerMode string           `yaml:"triggerMode"json:"triggerMode"`
+	Version          string           `yaml:"version" json:"version"`
+	Name             string           `yaml:"name" json:"name"`
+	Stages           map[string]Stage `yaml:"stages" json:"stages"`
+	Status           Status           `json:"status"`
+	StartTime        time.Time        `yaml:"startTime"json:"startTime"`
+	Duration         time.Duration    `json:"duration"`
+	TriggerMode      string           `yaml:"triggerMode"json:"triggerMode"`
+	PipelineDetailId int              `json:"pipelineDetailId"`
 }
 
 type JobDetail struct {

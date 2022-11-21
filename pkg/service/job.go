@@ -459,11 +459,16 @@ func (svc *JobService) ExecuteJob(name string) (*model.JobDetail, error) {
 	jobDetail.Status = model.STATUS_NOTRUN
 	jobDetail.StartTime = time.Now()
 	jobDetail.Stages = stageDetail
+	err = svc.SaveJobDetail(name, &jobDetail)
+	if err != nil {
+		return &jobDetail, err
+	}
+	jobData.Status = model.STATUS_RUNNING
 	log.Println(jobDetail)
 	//TODO... 执行 pipeline job
 
 	//create and save job detail
-	return &jobDetail, svc.SaveJobDetail(name, &jobDetail)
+	return &jobDetail, svc.UpdateJob(jobData.Name, "", jobData)
 }
 
 // ReExecuteJob re exec pipeline job

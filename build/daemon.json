@@ -1,0 +1,6 @@
+{
+  "storage-driver": "overlay2",
+  "registry-mirrors": [
+    "http://f1361db2.m.daocloud.io"
+  ]
+}

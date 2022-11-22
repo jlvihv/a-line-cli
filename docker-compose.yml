@@ -9,15 +9,16 @@ services:
       DOCKER_TLS_CERTDIR: /certs
     volumes:
       - "docker-certs:/certs"
-      - "a-line-workdir:/tmp/example"
+      - "a-line-workdir:/root/pipelines"
+      - "./build/daemon.json:/etc/docker/daemon.json"
+      - "tmp-dir:/root/workdir"
     ports:
       - "2376:2376"
-    command:
-      - --storage-driver
-      - overlay2
 
   a-line-cli:
     image: hamstershare/a-line-cli:latest
+    build:
+      dockerfile: ./Dockerfile
     networks:
       - a-line
     environment:
@@ -25,8 +26,9 @@ services:
       DOCKER_CERT_PATH: "/certs/client"
       DOCKER_TLS_VERIFY: "1"
     volumes:
-      - "docker-certs:/certs/client:ro "
-      - "a-line-workdir:/tmp/example"
+      - "docker-certs:/certs:ro "
+      - "a-line-workdir:/root/pipelines"
+      - "tmp-dir:/root/workdir"
     ports:
       - "8080:8080"
 
@@ -34,6 +36,6 @@ services:
 volumes:
   docker-certs: {}
   a-line-workdir: {}
-
+  tmp-dir: {}
 networks:
   a-line: {}

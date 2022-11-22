@@ -71,10 +71,13 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	env := make([]string, 0)
 	env = append(env, "NAME="+job.Name)
 
+	homeDir, _ := os.UserHomeDir()
+
 	engineContext := make(map[string]interface{})
-	engineContext["hamsterRoot"] = "/tmp/example"
-	engineContext["workdir"] = "/tmp/example"
+	engineContext["hamsterRoot"] = path.Join(homeDir, "workdir")
+	engineContext["workdir"] = engineContext["hamsterRoot"]
 	engineContext["name"] = job.Name
+	engineContext["id"] = fmt.Sprintf("%d", id)
 	engineContext["env"] = env
 
 	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), "stack", engineContext))

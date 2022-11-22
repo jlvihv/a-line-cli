@@ -3,6 +3,7 @@ package action
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/hamster-shared/a-line-cli/pkg/model"
 	"os"
 	"os/exec"
@@ -34,6 +35,9 @@ func (e *DockerEnv) Pre() error {
 
 	stack := e.ctx.Value(STACK).(map[string]interface{})
 
+	jobName := stack["name"].(string)
+	jobId := stack["id"].(string)
+
 	data, ok := stack["workdir"]
 
 	var workdir string
@@ -43,17 +47,18 @@ func (e *DockerEnv) Pre() error {
 		return errors.New("workdir error")
 	}
 
-	workdirTmp := workdir + "@tmp"
+	workdirTmp := workdir + "_tmp"
 
 	_ = os.MkdirAll(workdirTmp, os.ModePerm)
 
 	//user := fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid())
 	// "-u", user,
 
-	commands := []string{"docker", "run", "-t", "-d", "-v", workdir + ":" + workdir, "-v", workdirTmp + ":" + workdirTmp, "-w", workdir, e.Image, "cat"}
+	commands := []string{"docker", "run", "--name", fmt.Sprintf("%s_%s", jobName, jobId), "-t", "-d", "-v", workdir + ":" + workdir, "-v", workdirTmp + ":" + workdirTmp, "-w", workdir, e.Image, "cat"}
 	logger.Debugf("execute docker command: %s", strings.Join(commands, " "))
 	e.output.WriteCommandLine(strings.Join(commands, " "))
 	c := exec.Command(commands[0], commands[1:]...)
+	c.Env = os.Environ()
 	output, err := c.CombinedOutput()
 	if err != nil {
 		logger.Errorf("execute docker command error: %s", err.Error())
@@ -61,15 +66,20 @@ func (e *DockerEnv) Pre() error {
 	}
 	containerID := string(output)
 	logger.Debugf("docker command output: %s", containerID)
+	fmt.Printf("docker command output: %s \n", containerID)
 	e.output.WriteLine(containerID)
 
-	e.containerID = strings.Fields(containerID)[0]
+	filelds := strings.Fields(containerID)
+
+	fmt.Println(filelds)
+	e.containerID = filelds[len(filelds)-1]
 	return err
 }
 
 func (e *DockerEnv) Hook() (*model.ActionResult, error) {
 
 	c := exec.Command("docker", "top", e.containerID, "-eo", "pid,comm")
+	c.Env = os.Environ()
 	logger.Debugf("execute docker command: %s", strings.Join(c.Args, " "))
 	e.output.WriteCommandLine(strings.Join(c.Args, " "))
 

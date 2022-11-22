@@ -46,7 +46,7 @@ func (a *ShellAction) Pre() error {
 		return errors.New("workdir error")
 	}
 
-	workdirTmp := workdir + "@tmp"
+	workdirTmp := workdir + "_tmp"
 
 	_ = os.MkdirAll(workdirTmp, os.ModePerm)
 
@@ -83,7 +83,7 @@ func (a *ShellAction) Hook() (*model.ActionResult, error) {
 
 	c := exec.CommandContext(a.ctx, commands[0], commands[1:]...) // mac linux
 	c.Dir = workdir
-	c.Env = env
+	c.Env = append(env, os.Environ()...)
 
 	logger.Debugf("execute shell command: %s", strings.Join(commands, " "))
 	a.output.WriteCommandLine(strings.Join(commands, " "))
@@ -153,5 +153,5 @@ func (a *ShellAction) Hook() (*model.ActionResult, error) {
 }
 
 func (a *ShellAction) Post() error {
-	return os.Remove(a.command)
+	return os.Remove(a.filename)
 }

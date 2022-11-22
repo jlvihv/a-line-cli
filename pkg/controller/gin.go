@@ -40,6 +40,9 @@ func (h *HttpServer) StartHttpServer() {
 	r.POST("/pipeline/:name/:id/stop", h.handlerServer.stopJobDetail)
 	r.GET("/pipeline/:name/logs/:id", h.handlerServer.getJobLog)
 	r.GET("/pipeline/:name/logs/:id/:stagename", h.handlerServer.getJobStageLog)
+	// get template list
+	r.GET("/pipeline/templates", h.handlerServer.getTemplates)
+	r.GET("/pipeline/template/:id", h.handlerServer.getTemplateDetail)
 	r.GET("/ping", func(c *gin.Context) {
 		//输出json结果给调用方
 		Success("", c)

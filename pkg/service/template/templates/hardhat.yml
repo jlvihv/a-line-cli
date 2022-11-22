@@ -1,0 +1,51 @@
+version: 1.0
+name: my-hardhat
+stages:
+  remote-action:
+    steps:
+      - name: remote-shell
+        uses: mohaijiang/hello-world-action
+
+  git-clone:
+    steps:
+      - name: git-clone
+        uses: git-checkout
+        with:
+          url: https://github.com/mohaijiang/hardhat-example.git
+          branch: main
+  code-compile:
+    needs:
+      - git-clone
+    steps:
+      - name: code-compile
+        runs-on: node:16
+        run: |
+          npm install --save-dev hardhat
+          npx hardhat compile
+      - name: save artifactory
+        uses: hamster/artifactory
+        with:
+          name: some.zip
+          path: contracts/*.sol
+
+
+  solidity-lint:
+    needs:
+      - code-compile
+    steps:
+      - name: solidity-check
+        runs-on: node:16
+        run: |
+          npm install -g ethlint
+          solium --init
+          solium -d contracts/
+
+  slither:
+    needs:
+      - code-compile
+    steps:
+      - name: slither
+        runs-on: trailofbits/eth-security-toolbox
+        run: |
+          slither contracts/*sol
+

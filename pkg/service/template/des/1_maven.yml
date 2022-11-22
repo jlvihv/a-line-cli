@@ -1,0 +1,17 @@
+#template id
+id: 1
+
+#Template name
+name: "maven"
+
+#Template Description
+description: "Maven 是一款基于 Java 平台的项目管理和整合工具，它将项目的开发和管理过程抽象成一个项目对象模型（POM）。开发人员只需要做一些简单的配置，Maven 就可以自动完成项目的编译、测试、打包、发布以及部署等工作。"
+
+#Template classification
+tag: "GENERAL_TEMPLATE"
+
+#Corresponding picture name
+imageName: "maven"
+
+#Affiliate Template
+template: "maven.yml"

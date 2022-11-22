@@ -11,14 +11,16 @@ import (
 )
 
 type HandlerServer struct {
-	jobService service.IJobService
-	dispatch   dispatcher.IDispatcher
+	jobService      service.IJobService
+	dispatch        dispatcher.IDispatcher
+	templateService service.ITemplateService
 }
 
-func NewHandlerServer(jobService service.IJobService, dispatch dispatcher.IDispatcher) *HandlerServer {
+func NewHandlerServer(jobService service.IJobService, dispatch dispatcher.IDispatcher, templateService service.ITemplateService) *HandlerServer {
 	return &HandlerServer{
-		jobService: jobService,
-		dispatch:   dispatch,
+		jobService:      jobService,
+		dispatch:        dispatch,
+		templateService: templateService,
 	}
 }
 
@@ -238,5 +240,23 @@ func (h *HandlerServer) getJobStageLog(gin *gin.Context) {
 		return
 	}
 	data := h.jobService.GetJobStageLog(name, id, stageName)
+	Success(data, gin)
+}
+
+// getTemplates get template list
+func (h *HandlerServer) getTemplates(gin *gin.Context) {
+	data := h.templateService.GetTemplates()
+	Success(data, gin)
+}
+
+// getTemplateDetail get template detail
+func (h *HandlerServer) getTemplateDetail(gin *gin.Context) {
+	idStr := gin.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		Fail(err.Error(), gin)
+		return
+	}
+	data, _ := h.templateService.GetTemplateDetail(id)
 	Success(data, gin)
 }

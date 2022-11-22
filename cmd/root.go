@@ -20,12 +20,13 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var (
-	channel       = make(chan model.QueueMessage)
-	dispatch      = dispatcher.NewDispatcher(channel)
-	pipelineFile  string
-	jobService    = service.NewJobService()
-	handlerServer = controller.NewHandlerServer(jobService, dispatch)
-	rootCmd       = &cobra.Command{
+	channel         = make(chan model.QueueMessage)
+	dispatch        = dispatcher.NewDispatcher(channel)
+	pipelineFile    string
+	jobService      = service.NewJobService()
+	templateService = service.NewTemplateService()
+	handlerServer   = controller.NewHandlerServer(jobService, dispatch, templateService)
+	rootCmd         = &cobra.Command{
 		Use:   "a-line-cli",
 		Short: "A brief description of your application",
 		Long: `A longer description that spans multiple lines and likely contains

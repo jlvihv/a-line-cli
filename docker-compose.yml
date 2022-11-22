@@ -18,6 +18,8 @@ services:
 
   a-line-cli:
     image: hamstershare/a-line-cli:latest
+    build:
+      dockerfile: ./Dockerfile
     networks:
       - a-line
     environment:
@@ -25,7 +27,7 @@ services:
       DOCKER_CERT_PATH: "/certs/client"
       DOCKER_TLS_VERIFY: "1"
     volumes:
-      - "docker-certs:/certs/client:ro "
+      - "docker-certs:/certs:ro "
       - "a-line-workdir:/tmp/example"
     ports:
       - "8080:8080"

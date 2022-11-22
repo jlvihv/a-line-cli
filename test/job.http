@@ -3,7 +3,7 @@ POST http://localhost:8080/pipeline
 Content-Type: application/json
 
 {
-  "name": "test3",
+  "name": "test2",
   "yaml": "version: \"1.0\"\nname: my-test2\nstages:\n  git-clone:\n    steps:\n      - name: git-clone\n        uses: git-checkout\n        with:\n          url: https://gitee.com/mohaijiang/spring-boot-example.git\n          branch: master\n  code-compile:\n    needs:\n      - git-clone\n    steps:\n      - name: code-compile\n        runs-on: maven:3.5-jdk-8\n        run: |\n          mvn clean package -Dmaven.test.skip=true"
 }
 
@@ -24,7 +24,7 @@ Content-Type: application/json
 POST http://localhost:8080/pipeline/test2/0/re-exec
 
 ### get pipeline job
-GET http://localhost:8080/pipeline/test2
+GET http://localhost:8080/pipeline/test3
 
 ### delete pipeline job
 DELETE http://localhost:8080/pipeline/test2

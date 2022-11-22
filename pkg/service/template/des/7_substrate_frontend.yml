@@ -1,0 +1,17 @@
+#template id
+id: 7
+
+#Template name
+name: "Substrate + DApp (front end only)"
+
+#Template Description
+description: "This template is used for DApps written based on Substact framework to fully automate code checkout -> check front-end code quality -> edit front-end code -> deploy front-end code."
+
+#Template classification
+tag: "DAPP_TEMPLATE(Frontend)"
+
+#Corresponding picture name
+imageName: "substrate"
+
+#Affiliate Template
+template: "maven.yml"

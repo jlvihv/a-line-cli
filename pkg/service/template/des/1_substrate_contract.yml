@@ -1,0 +1,17 @@
+#template id
+id: 1
+
+#Template name
+name: "Substrate + Smart Contracts"
+
+#Template Description
+description: "This template is used for smart contracts written based on the Substact framework, enabling fully automated code checkout -> check contract quality -> compile contract -> test contract -> deploy contract."
+
+#Template classification
+tag: "SMART_CONTRACT_TEMPLATE"
+
+#Corresponding picture name
+imageName: "substrate"
+
+#Affiliate Template
+template: "maven.yml"

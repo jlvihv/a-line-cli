@@ -1,0 +1,17 @@
+#template id
+id: 2
+
+#Template name
+name: "Hardhat + Smart Contracts"
+
+#Template Description
+description: "This template is used for smart contracts written based on Hardhat framework to fully automate code checkout -> check contract quality -> compile contract -> test contract -> deploy contract."
+
+#Template classification
+tag: "SMART_CONTRACT_TEMPLATE"
+
+#Corresponding picture name
+imageName: "hardhat"
+
+#Affiliate Template
+template: "maven.yml"

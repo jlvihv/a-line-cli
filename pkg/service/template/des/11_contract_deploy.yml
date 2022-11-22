@@ -1,0 +1,17 @@
+#template id
+id: 12
+
+#Template name
+name: "Smart Contract Deployment"
+
+#Template Description
+description: "Deployment operation for a smart contract."
+
+#Template classification
+tag: "GENERAL_TEMPLATE"
+
+#Corresponding picture name
+imageName: "contract_deploy"
+
+#Affiliate Template
+template: "maven.yml"

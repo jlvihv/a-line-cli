@@ -1,0 +1,17 @@
+#template id
+id: 11
+
+#Template name
+name: "Smart Contract Test"
+
+#Template Description
+description: "Perform quality checks on a smart contract and output relevant reports."
+
+#Template classification
+tag: "GENERAL_TEMPLATE"
+
+#Corresponding picture name
+imageName: "contract_test"
+
+#Affiliate Template
+template: "maven.yml"

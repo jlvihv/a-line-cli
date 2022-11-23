@@ -71,10 +71,10 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 	env := make([]string, 0)
 	env = append(env, "NAME="+job.Name)
 
-	homeDir, _ := os.UserHomeDir()
+	//homeDir, _ := os.UserHomeDir()
 
 	engineContext := make(map[string]interface{})
-	engineContext["hamsterRoot"] = path.Join(homeDir, "workdir")
+	engineContext["hamsterRoot"] = "/tmp/example"
 	engineContext["workdir"] = engineContext["hamsterRoot"]
 	engineContext["name"] = job.Name
 	engineContext["id"] = fmt.Sprintf("%d", id)
@@ -132,6 +132,14 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 			}
 			if step.Uses == "git-checkout" {
 				ah = action2.NewGitAction(step, ctx, jobWrapper.Output)
+				err = executeAction(ah, jobWrapper)
+			}
+			if step.Uses == "hamster/ipfs" {
+				ah = action2.NewIpfsAction(step, ctx, jobWrapper.Output)
+				err = executeAction(ah, jobWrapper)
+			}
+			if step.Uses == "hamster/artifactory" {
+				ah = action2.NewArtifactoryAction(step, ctx, jobWrapper.Output)
 				err = executeAction(ah, jobWrapper)
 			}
 			if strings.Contains(step.Uses, "/") {

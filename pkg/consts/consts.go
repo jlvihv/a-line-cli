@@ -10,3 +10,12 @@ const (
 const (
 	TRIGGER_MODE = "Manual trigger"
 )
+
+const (
+	ARTIFACTORY_DIR = PIPELINE_DIR_NAME + "/" + JOB_DIR_NAME + "/artifactory"
+)
+
+const (
+	IPFS_SHELL   = "http://localhost:5001"
+	IPFS_WEB_URL = "http://localhost:37774/ipfs/"
+)

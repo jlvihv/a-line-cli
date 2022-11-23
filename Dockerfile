@@ -12,7 +12,7 @@ RUN go mod tidy && go build -o a-line-cli
 
 FROM ubuntu:latest
 RUN apt update &&\
-    apt install -y apt-transport-https ca-certificates curl git
+    apt install -y apt-transport-https ca-certificates curl git gnupg
 
 RUN curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" | gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
 RUN chmod a+r /etc/apt/keyrings/docker.gpg

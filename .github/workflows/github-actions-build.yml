@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
   package:
@@ -18,11 +19,17 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-#      - name: setup node
-#        uses: actions/setup-node@v2
-#        with:
-#          node-version: ${{ matrix.node-version }}
+      - name: setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
       # You may need to manually build you frontend manually here, unless you have configured frontend build and install commands in wails.json.
+      - name: frontend
+        run: |
+          git clone https://github.com/hamster-shared/a-line.git -b develop
+          cd a-line
+          npm install && npm run build
+          cp -r dist ../pkg/controller
       - name: go build
         run: go mod tidy && go build -o a-line-cli
       - name: Login to Docker Hub

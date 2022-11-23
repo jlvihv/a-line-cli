@@ -135,6 +135,14 @@ func (e *Executor) Execute(id int, job *model.Job) error {
 				ah = action2.NewGitAction(step, ctx, jobWrapper.Output)
 				err = executeAction(ah, jobWrapper)
 			}
+			if step.Uses == "hamster/ipfs" {
+				ah = action2.NewIpfsAction(step, ctx, jobWrapper.Output)
+				err = executeAction(ah, jobWrapper)
+			}
+			if step.Uses == "hamster/artifactory" {
+				ah = action2.NewArtifactoryAction(step, ctx, jobWrapper.Output)
+				err = executeAction(ah, jobWrapper)
+			}
 			if strings.Contains(step.Uses, "/") {
 				ah = action2.NewRemoteAction(step, ctx)
 				err = executeAction(ah, jobWrapper)
